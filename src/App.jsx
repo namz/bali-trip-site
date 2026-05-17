@@ -162,11 +162,10 @@ const bookings = [
   { title: "Book DADI BALI ADVENTURES — Jun 7, 08:30", sub: "Tandem ATV (90 min) · book night before", tag: "soon" },
   { title: "Book Tis Cafe — Jun 7, 11:30", sub: "Brunch · swings · infinity pool · reserve table", tag: "soon" },
   { title: "Potato Head Beach Club — Jun 4", sub: "Arrive 16:00 · stay till late · dinner there", tag: "anytime" },
-  { title: "Ku De Ta — Jun 5", sub: "Arrive 16:00 · sunset · dinner there", tag: "anytime" },
+  { title: "Ku De Ta — Jun 5", sub: "Dinner 19:30 · arrive earlier for sunset", tag: "anytime" },
   { section: "Concierge (Udaya)" },
-  { title: "Brief concierge — Breakfast setup Jun 8", sub: "Tropical spread · discreet · book 1 week before", tag: "urgent" },
-  { title: "Breakfast at Udaya — Jun 9, 07:00", sub: "✓ Booked & confirmed", tag: "anytime" },
-  { title: "Brief concierge — Jun 9 evening", sub: "Suite ready 16:00 · candle path · privacy", tag: "urgent" },
+  { title: "Breakfast at Udaya — Jun 9, 07:00", sub: "Breakfast · confirmed", tag: "anytime" },
+  { title: "Brief concierge — Jun 9 evening", sub: "Suite ready 16:00", tag: "urgent" },
   { section: "Pharmacy" },
   { title: "Travelan (Bali Belly defence)", sub: "1 tablet 30 min before each meal · daily from 2 days pre-landing", tag: "pharmacy" },
   { title: "Imodium (loperamide) + Gastrolyte ORS", sub: "Plus Flagyl/Metronidazole on prescription", tag: "pharmacy" },
@@ -198,7 +197,7 @@ const driverPlan = [
   { section: "Pre-Trip (Australia)" },
   { day: "Jun 2", title: "Uber/Taxi: Home → MEL Airport", sub: "Flight 6:35 AM · book 2 days in advance · arrive by 4:30 AM", type: "book", status: "todo", costMid: 60 },
   { section: "Seminyak" },
-  { day: "Jun 2", title: "Airport pickup DPS → Monolocale", sub: "Pre-arranged via Monolocale · ~$35–50 AUD", type: "confirmed", status: "done", costMid: 42 },
+  { day: "Jun 2", title: "Airport pickup DPS → Monolocale", sub: "Pre-arranged via Klook · Meet at Klook kiosk", type: "confirmed", status: "done", costMid: 42 },
   { day: "Jun 3", title: "No driver needed", sub: "Svaha Spa near Monolocale · Bluebird for Merah Putih dinner", type: "none", status: "na", costMid: 0 },
   { day: "Jun 4", title: "Half day driver", sub: "Local browsing → Potato Head Beach Club (dinner there) · ~$30–40", type: "book", status: "todo", costMid: 35 },
   { day: "Jun 5", title: "Short rides only (Bluebird)", sub: "Grooming + Ku De Ta (dinner there) · ~$25–35", type: "bluebird", status: "na", costMid: 30 },
@@ -209,7 +208,7 @@ const driverPlan = [
   { day: "Jun 8", title: "Half day evening", sub: "Gojek to INKA at 13:45 · Sayan House at 18:00 · ~$35–40", type: "book", status: "todo", costMid: 37 },
   { day: "Jun 9", title: "Short ride to BSI for IV Drip", sub: "Order Bluebird or Gojek · ~10:00 AM · Kaveri at Udaya · $0 driver needed rest of day", type: "bluebird", status: "na", costMid: 0 },
   { section: "Departure" },
-  { day: "Jun 10", title: "Airport transfer Udaya → DPS", sub: "Udaya pre-arranged · ~$50–70 · depart 11:00", type: "confirmed", status: "todo", costMid: 60 },
+  { day: "Jun 10", title: "Airport transfer Udaya → DPS", sub: "To be booked via Klook · depart 11:00", type: "book", status: "todo", costMid: 60 },
 ];
 
 const typeColor = { sem: C.ember, ubu: C.moss, trn: C.gold };
