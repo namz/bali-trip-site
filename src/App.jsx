@@ -36,11 +36,11 @@ const TRIP_END_ISO = "2026-06-10";
 // DATA
 // ============================================
 const days = [
-  { num: 1, date: "Tue · Jun 2", iso: "2026-06-02", title: "Arrival + Hydrafacial", type: "sem", badge: "Seminyak", anchor: "Land 10:35 · Signature Hydrafacial + IV Drip · Shelter dinner",
+  { num: 1, date: "Tue · Jun 2", iso: "2026-06-02", title: "Arrival + Hydrafacial", type: "sem", badge: "Seminyak", anchor: "Land 10:35 · Signature Hydrafacial · Shelter dinner",
     schedule: [
       { time: "10:35", icon: "✈️", act: "Land DPS — Monolocale pre-arranged pickup" },
       { time: "12:00", icon: "🏨", act: "Check in · shower · decompress" },
-      { time: "16:30", icon: "💆", act: "Bodylabs — Signature Hydrafacial + IV Drip" },
+      { time: "16:30", icon: "💆", act: "Bodylabs — Signature Hydrafacial" },
       { time: "19:00", icon: "🍽", act: "Dinner: Shelter Restaurant — modern Australian-Asian" },
       { time: "21:00", icon: "🌙", act: "Return · 750ml water + electrolytes · sleep" },
     ] },
@@ -90,9 +90,11 @@ const days = [
       { time: "18:00", icon: "🚗", act: "Depart to The Sayan House" },
       { time: "19:00", icon: "🌅", act: "Dinner: The Sayan House — Japanese-Latin fusion, gorge sunset" },
     ] },
-  { num: 8, date: "Tue · Jun 9", iso: "2026-06-09", title: "Relax & Make Memories", type: "ubu", badge: "Ubud ✦", anchor: "Sound Healing · Kaveri Signature · ✦ Evening",
+  { num: 8, date: "Tue · Jun 9", iso: "2026-06-09", title: "Relax & Make Memories", type: "ubu", badge: "Ubud ✦", anchor: "Yoga 7:30 · Breakfast in room · IV Drip BSI · Kaveri Signature · ✦ Evening",
     schedule: [
-      { time: "08:00", icon: "🎵", act: "Sound Healing at The Udaya — TBC: needs booking confirmation from Udaya" },
+      { time: "07:30", icon: "🧘", act: "Yoga Session (07:30 – 08:30) at The Udaya" },
+      { time: "08:30", icon: "🥐", act: "Breakfast in room at Udaya" },
+      { time: "10:00", icon: "💉", act: "IV Drip at BSI — need to drive · Order Bluebird or Gojek" },
       { time: "13:30", icon: "🌸", act: "Kaveri Signature Couples — Royal Massage + Flower bath (2.5 hrs)" },
       { time: "16:00", icon: "🛁", act: "Return to Jungle Pool Suite · dress slowly together" },
       { time: "19:30", icon: "✦", act: "Dinner and relax at Udaya — the dinner of the trip" },
@@ -119,14 +121,14 @@ const dining = [
 ];
 
 const spas = [
-  { day: "Jun 2", date: "Tue · Jun 2", name: "Signature Hydrafacial + IV Drip", loc: "Bodylabs, Seminyak", dur: "~90 min", mins: 90 },
+  { day: "Jun 2", date: "Tue · Jun 2", name: "Signature Hydrafacial", loc: "Bodylabs, Seminyak", dur: "~90 min", mins: 90 },
   { day: "Jun 3", date: "Wed · Jun 3", name: "Ear Candle + Back Massage + Body Scrub", loc: "Svaha Spa, Seminyak", dur: "~2.5 hrs", mins: 150 },
   { day: "Jun 4", date: "Thu · Jun 4", name: "Svaha Bamboo Massage", loc: "Svaha Spa, Seminyak", dur: "90 min", mins: 90 },
   { day: "Jun 5", date: "Fri · Jun 5", name: "Bali Barber + Shampoo Lounge", loc: "Bali Barber / Shampoo Lounge", dur: "4–5 hrs", mins: 270 },
   { day: "Jun 6", date: "Sat · Jun 6", name: "4 Hands Massage + Scrub + Botanical Bath", loc: "Kaveri Spa, The Udaya", dur: "2 hrs", mins: 120 },
   { day: "Jun 7", date: "Sun · Jun 7", name: "Balinese + Energy Work", loc: "Kaveri Spa, The Udaya", dur: "120 min", mins: 120 },
   { day: "Jun 8", date: "Mon · Jun 8", name: "INKA Anti-Aging Facial + Mani/Pedi", loc: "INKA Spa, Jl. Monkey Forest", dur: "~2 hrs", mins: 120 },
-  { day: "Jun 9", date: "Tue · Jun 9", name: "Sound Healing (TBC)", loc: "The Udaya · pending booking", dur: "~60 min", mins: 60 },
+  { day: "Jun 9", date: "Tue · Jun 9", name: "Yoga Session", loc: "The Udaya", dur: "60 min", mins: 60 },
   { day: "Jun 9", date: "Tue · Jun 9", name: "Kaveri Signature · Flowers", loc: "Kaveri Spa, The Udaya", dur: "2.5 hrs", mins: 150 },
 ];
 
@@ -138,7 +140,7 @@ const bookings = [
   { title: "Confirm The Udaya — Jun 6–10", sub: "Jungle Pool Suite · 4 nights · daily fruit basket", tag: "urgent" },
   { title: "Arrange airport pickup with Monolocale — Jun 2", sub: "No Grab at DPS — hotel pre-arranged only", tag: "urgent" },
   { section: "Treatments & Spa" },
-  { title: "Book Bodylabs — Jun 2, 16:30", sub: "Signature Hydrafacial + IV Drip · Seminyak", tag: "urgent" },
+  { title: "Book Bodylabs — Jun 2, 16:30", sub: "Signature Hydrafacial · Seminyak", tag: "urgent" },
   { title: "Book Svaha Spa — Jun 3, 11:00", sub: "Ear Candle + Back Massage + Javanese Body Scrub (~2.5 hrs)", tag: "urgent" },
   { title: "Book Svaha Bamboo Massage — Jun 4, 11:00", sub: "Svaha Spa · individual side-by-side (90 min)", tag: "urgent" },
   { title: "WhatsApp Bali Barber — Jun 5, 10:00", sub: "President's Package · +62 853 3833 3338", tag: "urgent" },
@@ -146,7 +148,8 @@ const bookings = [
   { title: "Book Kaveri 4 Hands Couples — Jun 6, 13:30", sub: "The Udaya · 60 min 4 Hands + Scrub + Botanical Bath", tag: "urgent" },
   { title: "Book Kaveri Balinese + Energy Work — Jun 7, 17:00", sub: "The Udaya · 120 min, both", tag: "urgent" },
   { title: "Book INKA Spa — Jun 8, 14:00", sub: "Anti-Aging Facial + Mani/Pedi · +62 813 5396 6547", tag: "urgent" },
-  { title: "Book Sound Healing at Udaya — Jun 9, 08:00", sub: "TBC: confirm availability + booking with Udaya concierge", tag: "urgent" },
+  { title: "Book Yoga Session — Jun 9, 07:30", sub: "The Udaya · 60 min · book with concierge", tag: "urgent" },
+  { title: "Book IV Drip at BSI — Jun 9, 10:00", sub: "Need to drive · Order Bluebird or Gojek to get there", tag: "urgent" },
   { title: "Book Kaveri Signature Couples — Jun 9, 13:30", sub: "Royal Massage + Flowers · 2.5 hrs", tag: "urgent" },
   { section: "Dining Reservations" },
   { title: "Book Shelter — Jun 2, 19:00", sub: "Seminyak · 2 people", tag: "soon" },
@@ -204,7 +207,7 @@ const driverPlan = [
   { section: "Ubud" },
   { day: "Jun 7", title: "Full day: DADI + Tis Cafe", sub: "Driver waits at both locations · ~$60–65", type: "book", status: "todo", costMid: 62 },
   { day: "Jun 8", title: "Half day evening", sub: "Gojek to INKA at 13:45 · Sayan House at 18:00 · ~$35–40", type: "book", status: "todo", costMid: 37 },
-  { day: "Jun 9", title: "No driver needed", sub: "Sound Healing + Kaveri at Udaya · all on-property · $0", type: "none", status: "na", costMid: 0 },
+  { day: "Jun 9", title: "Short ride to BSI for IV Drip", sub: "Order Bluebird or Gojek · ~10:00 AM · Kaveri at Udaya · $0 driver needed rest of day", type: "bluebird", status: "na", costMid: 0 },
   { section: "Departure" },
   { day: "Jun 10", title: "Airport transfer Udaya → DPS", sub: "Udaya pre-arranged · ~$50–70 · depart 11:00", type: "confirmed", status: "todo", costMid: 60 },
 ];
