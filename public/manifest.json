@@ -1,0 +1,12 @@
+{
+  "name": "Bali Trip — Namit & Wife",
+  "short_name": "Bali",
+  "description": "Our Bali itinerary",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f2e8",
+  "theme_color": "#0f1a10",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
