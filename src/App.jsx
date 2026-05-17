@@ -27,7 +27,7 @@ const C = {
   text: "#1a1208", textSoft: "#5a4a30", textGhost: "#9a8a6a",
   riceDark: "#d4c5a9", riceDeep: "#ede4d0",
 };
-const SERIF = "'Playfair Display', Georgia, serif";
+const SERIF = "'Raleway', system-ui, sans-serif";
 const SANS = "'DM Sans', system-ui, sans-serif";
 const TRIP_START_ISO = "2026-06-02";
 const TRIP_END_ISO = "2026-06-10";
