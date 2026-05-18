@@ -33,10 +33,58 @@ const TRIP_START_ISO = "2026-06-02";
 const TRIP_END_ISO = "2026-06-10";
 
 // ============================================
+// WEATHER
+// ============================================
+const WMO = { 0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌦",61:"🌧",63:"🌧",65:"🌧",80:"🌦",81:"🌦",82:"🌦",95:"⛈",96:"⛈",99:"⛈" };
+const WMO_LABEL = { 0:"Sunny",1:"Mostly sunny",2:"Partly cloudy",3:"Overcast",45:"Foggy",51:"Light drizzle",61:"Rain",80:"Showers",95:"Thunderstorm" };
+const BALI_AVG = { icon:"⛅", high:30, low:24, rain:40, label:"Partly cloudy · afternoon showers" };
+
+function useWeather() {
+  const [wx, setWx] = useState({});
+  useEffect(() => {
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=-8.34&longitude=115.09&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_mean,weathercode&timezone=Asia%2FMakassar&forecast_days=16")
+      .then(r => r.json()).then(d => {
+        if (!d.daily) return;
+        const m = {};
+        d.daily.time.forEach((dt, i) => { m[dt] = { icon: WMO[d.daily.weathercode[i]] || "⛅", label: WMO_LABEL[d.daily.weathercode[i]] || "Partly cloudy", high: Math.round(d.daily.temperature_2m_max[i]), low: Math.round(d.daily.temperature_2m_min[i]), rain: Math.round(d.daily.precipitation_probability_mean[i]) }; });
+        setWx(m);
+      }).catch(() => {});
+  }, []);
+  return wx;
+}
+
+// Activity icon → color
+const ACT_COLORS = {
+  "✈️":"#b8882a","🚗":"#b8882a","🛵":"#b8882a","🏍":"#b8882a","🧳":"#b8882a","🧾":"#b8882a",
+  "💆":"#9b6dbf","🌸":"#9b6dbf","🧘":"#9b6dbf",
+  "🍽":"#c4633a","🥐":"#c4633a",
+  "🏊":"#3b82b8","🏖":"#3b82b8","🌅":"#3b82b8","💧":"#3b82b8","🏨":"#5a7a8a",
+  "📸":"#d4aa50","🎡":"#d4aa50",
+  "💉":"#c0444a","💊":"#c0444a",
+  "☀️":"#d4aa50","🌿":"#2d4a2e","🌙":"#2d4a2e",
+};
+
+// Tipping guide
+const tipping = [
+  { venue:"Casual restaurants & warungs", amount:"10,000–20,000 IDR", note:"Round up or leave on table" },
+  { venue:"Merah Putih · Sayan House · Potato Head", amount:"50,000–100,000 IDR", note:"10% often included — check bill first" },
+  { venue:"Deeva Restaurant (Udaya)", amount:"30,000–50,000 IDR", note:"In-house — discretionary" },
+  { venue:"Kaveri Spa therapists", amount:"50,000–100,000 IDR / person", note:"Hand directly to therapist, not reception" },
+  { venue:"INKA Spa therapists", amount:"50,000–100,000 IDR / person", note:"Hand directly to therapist" },
+  { venue:"Svaha Spa therapists", amount:"30,000–50,000 IDR / person", note:"Hand directly to therapist" },
+  { venue:"Full day driver ($60)", amount:"50,000–100,000 IDR", note:"Give at end of day" },
+  { venue:"Half day driver ($40)", amount:"30,000–50,000 IDR", note:"Give at end of booking" },
+  { venue:"Bluebird / Gojek", amount:"Not required", note:"Metered fare is fair" },
+  { venue:"Hotel porter / valet", amount:"10,000–20,000 IDR per bag", note:"" },
+];
+
+// ============================================
 // DATA
 // ============================================
 const days = [
-  { num: 1, date: "Tue · Jun 2", iso: "2026-06-02", title: "Arrival + Hydrafacial", type: "sem", badge: "Seminyak", anchor: "Land 10:35 · Signature Hydrafacial · Shelter dinner",
+  { num: 1, date: "Tue · Jun 2", iso: "2026-06-02", title: "Arrival + Hydrafacial", type: "sem", badge: "Seminyak", anchor: "Land 10:35 · Signature Hydrafacial · Shelter dinner", budgetAUD: 300,
+    packingList: ["Passport + e-VOA confirmation ready", "Comfortable travel clothes", "Electrolytes + hydration for flight", "AUD cash to exchange at airport", "Download Bluebird + Gojek before landing"],
+    venues: [{ name: "Bodylabs Skin & Wellness", phone: "62361736969", maps: "Bodylabs+Skin+Wellness+Seminyak+Bali" }, { name: "Shelter Restaurant", phone: "62361735368", maps: "Shelter+Restaurant+Seminyak+Bali" }],
     schedule: [
       { time: "10:35", icon: "✈️", act: "Land DPS — Klook pickup · meet at Klook kiosk" },
       { time: "12:00", icon: "🏨", act: "Check in · shower · decompress" },
@@ -44,27 +92,35 @@ const days = [
       { time: "19:00", icon: "🍽", act: "Dinner: Shelter Restaurant — modern Australian-Asian" },
       { time: "21:00", icon: "🌙", act: "Return · 750ml water + electrolytes · sleep" },
     ] },
-  { num: 2, date: "Wed · Jun 3", iso: "2026-06-03", title: "Spa Day", type: "sem", badge: "Seminyak", anchor: "Svaha Spa: Ear Candle + Massage + Scrub · Merah Putih dinner",
+  { num: 2, date: "Wed · Jun 3", iso: "2026-06-03", title: "Spa Day", type: "sem", badge: "Seminyak", anchor: "Svaha Spa: Ear Candle + Massage + Scrub · Merah Putih dinner", budgetAUD: 210,
+    packingList: ["Loose comfortable clothing (post-spa)", "Cash IDR for spa tips (50–100k IDR per therapist)", "Light hydration bottle", "No tight clothing — you'll be in robes most of the day"],
+    venues: [{ name: "Svaha Spa Seminyak", phone: "62361738009", maps: "Svaha+Spa+Seminyak+Bali" }, { name: "Merah Putih Restaurant", phone: "62361846 5950", maps: "Merah+Putih+Restaurant+Seminyak" }],
     schedule: [
       { time: "09:00", icon: "☀️", act: "Slow morning at Monolocale · late breakfast · pool" },
       { time: "11:00", icon: "💆", act: "Svaha Spa — Ear Candle + Back Massage + Javanese Body Scrub (~2.5 hrs)" },
       { time: "14:00", icon: "🏊", act: "Hotel · pool · nap" },
       { time: "19:30", icon: "🍽", act: "Dinner: Merah Putih — modern Indonesian" },
     ] },
-  { num: 3, date: "Thu · Jun 4", iso: "2026-06-04", title: "Svaha Bamboo + Potato Head Beach Club", type: "sem", badge: "Seminyak", anchor: "Svaha Bamboo · Local browsing · Potato Head Beach Club dinner",
+  { num: 3, date: "Thu · Jun 4", iso: "2026-06-04", title: "Svaha Bamboo + Potato Head Beach Club", type: "sem", badge: "Seminyak", anchor: "Svaha Bamboo · Local browsing · Potato Head Beach Club dinner", budgetAUD: 230,
+    packingList: ["Swimwear (Potato Head has amazing pools)", "Reef-safe sunscreen", "Evening outfit for Potato Head dinner", "Bluebird app ready on phone", "Cash IDR for local markets"],
+    venues: [{ name: "Svaha Spa Seminyak", phone: "62361738009", maps: "Svaha+Spa+Seminyak+Bali" }, { name: "Potato Head Beach Club", phone: "62361473719", maps: "Potato+Head+Beach+Club+Seminyak" }],
     schedule: [
       { time: "11:00", icon: "💆", act: "Svaha Bamboo Massage — side-by-side (90 min)" },
       { time: "12:30", icon: "🛍", act: "Local browsing / markets · lunch · rest" },
       { time: "16:00", icon: "🏖", act: "Potato Head Beach Club — pools, sunset, stay till late" },
       { time: "19:30", icon: "🍽", act: "Dinner at Potato Head Beach Club" },
     ] },
-  { num: 4, date: "Fri · Jun 5", iso: "2026-06-05", title: "Grooming + Ku De Ta Sunset", type: "sem", badge: "Seminyak", anchor: "Bali Barber · Shampoo Lounge · Ku De Ta · dinner there",
+  { num: 4, date: "Fri · Jun 5", iso: "2026-06-05", title: "Grooming + Ku De Ta Sunset", type: "sem", badge: "Seminyak", anchor: "Bali Barber · Shampoo Lounge · Ku De Ta · dinner there", budgetAUD: 350,
+    packingList: ["Camera / phone fully charged", "Comfortable walking shoes for browsing", "Smart-casual evening outfit for Ku De Ta", "Arrive Ku De Ta at 16:00 for golden sunset light"],
+    venues: [{ name: "Bali Barber", phone: "6285338333338", maps: "Bali+Barber+Seminyak" }, { name: "Ku De Ta (now Alias)", phone: "62361736969", maps: "Ku+De+Ta+Alias+Seminyak+Bali" }],
     schedule: [
       { time: "10:00", icon: "✂️", act: "Bali Barber + Shampoo Lounge — 4–5 hrs total" },
       { time: "16:00", icon: "🌅", act: "Ku De Ta (now Alias) — beachfront, pools, sunset" },
       { time: "19:30", icon: "🍽", act: "Dinner at Ku De Ta" },
     ] },
-  { num: 5, date: "Sat · Jun 6", iso: "2026-06-06", title: "Transfer to Ubud + Kaveri", type: "trn", badge: "Transfer", anchor: "Seminyak → Ubud · Jungle Pool Suite · Kaveri 4 Hands",
+  { num: 5, date: "Sat · Jun 6", iso: "2026-06-06", title: "Transfer to Ubud + Kaveri", type: "trn", badge: "Transfer", anchor: "Seminyak → Ubud · Jungle Pool Suite · Kaveri 4 Hands", budgetAUD: 270,
+    packingList: ["All luggage packed + ready by 09:00", "Swimwear accessible (Kaveri spa on arrival)", "Snacks + water for 90-min mountain transfer", "Say goodbye to Seminyak + Monolocale"],
+    venues: [{ name: "The Udaya Resort & Spa", phone: "62361975668", maps: "The+Udaya+Resort+Ubud+Bali" }, { name: "Kaveri Spa", phone: "62361975668", maps: "Kaveri+Spa+Udaya+Ubud" }],
     schedule: [
       { time: "09:00", icon: "☕️", act: "Slow last breakfast at Monolocale" },
       { time: "09:30", icon: "🚗", act: "Checkout · depart Seminyak → Ubud (~90 min)" },
@@ -72,8 +128,9 @@ const days = [
       { time: "13:30", icon: "💆", act: "Kaveri Spa — 4 Hands Massage (60 min) + Scrub + Botanical Bath (2 hrs)" },
       { time: "19:00", icon: "🍽", act: "Room service or Deeva Restaurant in-suite" },
     ] },
-  { num: 6, date: "Sun · Jun 7", iso: "2026-06-07", title: "Tis Cafe + Ulu Petanu Waterfall", type: "ubu", badge: "Ubud", anchor: "Tis Cafe 08:30 · Ulu Petanu Waterfall · relax afternoon · Deeva dinner",
+  { num: 6, date: "Sun · Jun 7", iso: "2026-06-07", title: "Tis Cafe + Ulu Petanu Waterfall", type: "ubu", badge: "Ubud", anchor: "Tis Cafe 08:30 · Ulu Petanu Waterfall · relax afternoon · Deeva dinner", budgetAUD: 175,
     summary: "3 locations · 5.25 hrs active · 6 hrs rest · ~600k IDR / couple",
+    venues: [{ name: "Tis Cafe", phone: "628214733966", maps: "Tis+Cafe+Ubud+Bali" }, { name: "Ulu Petanu Waterfall", maps: "Ulu+Petanu+Waterfall+Ubud+Bali" }, { name: "Deeva Restaurant (Udaya)", phone: "62361975668", maps: "Deeva+Restaurant+Udaya+Ubud" }],
     costs: [
       { item: "Standard Pool Daybed (Tis Cafe)", note: "150k IDR / person · book ahead" },
       { item: "Bali Swing (Tis Cafe)", note: "Included in daybed" },
@@ -113,7 +170,9 @@ const days = [
       { time: "13:45", icon: "🌿", act: "Back at Udaya — long shower, private pool, rest · light lunch if needed" },
       { time: "19:30", icon: "🍽", act: "Deeva Restaurant — in-house dinner" },
     ] },
-  { num: 7, date: "Mon · Jun 8", iso: "2026-06-08", title: "DADI ATV + Lunch at Udaya + INKA + Sayan House", type: "ubu", badge: "Ubud", anchor: "DADI 08:30 · lunch at Udaya · INKA · Sayan dinner",
+  { num: 7, date: "Mon · Jun 8", iso: "2026-06-08", title: "DADI ATV + Lunch at Udaya + INKA + Sayan House", type: "ubu", badge: "Ubud", anchor: "DADI 08:30 · lunch at Udaya · INKA · Sayan dinner", budgetAUD: 390,
+    packingList: ["Old activewear / clothes you don't mind getting muddy (ATV)", "Change of clothes + smart-casual for Sayan House", "Swimwear for Udaya pool buffer", "Full day driver confirmed the night before"],
+    venues: [{ name: "DADI Bali Adventures", phone: "628786225655", maps: "DADI+Bali+Adventures+Ubud" }, { name: "INKA Spa", phone: "6281353966547", maps: "INKA+Spa+Monkey+Forest+Ubud" }, { name: "The Sayan House", phone: "62361978769", maps: "The+Sayan+House+Ubud+Bali" }],
     schedule: [
       { time: "08:30", icon: "🏍", act: "DADI BALI ADVENTURES — Tandem ATV (90 min)" },
       { time: "10:00", icon: "🚿", act: "Return Udaya · shower · freshen up" },
@@ -124,7 +183,9 @@ const days = [
       { time: "18:00", icon: "🚗", act: "Depart to The Sayan House" },
       { time: "19:00", icon: "🌅", act: "Dinner: The Sayan House — Japanese-Latin fusion, gorge sunset" },
     ] },
-  { num: 8, date: "Tue · Jun 9", iso: "2026-06-09", title: "Relax & Make Memories", type: "ubu", badge: "Ubud ✦", anchor: "Yoga 7:30 · Breakfast in room · IV Drip BSI · Kaveri Signature · ✦ Evening",
+  { num: 8, date: "Tue · Jun 9", iso: "2026-06-09", title: "Relax & Make Memories", type: "ubu", badge: "Ubud ✦", anchor: "Yoga 7:30 · Breakfast in room · IV Drip BSI · Kaveri Signature · ✦ Evening", budgetAUD: 410,
+    packingList: ["Yoga clothes (07:30 session)", "Comfortable clothes for BSI IV Drip trip", "Cash IDR for BSI + tips", "Kaveri Signature booking confirmation"],
+    venues: [{ name: "Kaveri Spa (Kaveri Signature)", phone: "62361975668", maps: "Kaveri+Spa+Udaya+Ubud" }, { name: "BSI Clinic Ubud", maps: "BSI+Clinic+Ubud+Bali" }],
     schedule: [
       { time: "07:30", icon: "🧘", act: "Yoga Session (07:30 – 08:30) at The Udaya" },
       { time: "08:30", icon: "🥐", act: "Breakfast in room at Udaya" },
@@ -133,7 +194,8 @@ const days = [
       { time: "16:00", icon: "🛁", act: "Return to Jungle Pool Suite · dress slowly together" },
       { time: "19:30", icon: "✦", act: "Dinner and relax at Udaya — the dinner of the trip" },
     ] },
-  { num: 9, date: "Wed · Jun 10", iso: "2026-06-10", title: "Gentle Farewell", type: "ubu", badge: "Departure", anchor: "Final pool morning · fly home to Melbourne",
+  { num: 9, date: "Wed · Jun 10", iso: "2026-06-10", title: "Gentle Farewell", type: "ubu", badge: "Departure", anchor: "Final pool morning · fly home to Melbourne", budgetAUD: 85,
+    packingList: ["All luggage packed (checkout 11:00)", "Download boarding passes the night before", "Klook transfer confirmed · depart 11:00", "Leave tips for Udaya staff + thank housekeeping"],
     schedule: [
       { time: "08:30", icon: "☕️", act: "Slow breakfast at Deeva or in bed" },
       { time: "09:30", icon: "🏊", act: "Final float in Jungle Pool Suite private pool" },
@@ -410,6 +472,7 @@ function DayTimeline({ schedule, color }) {
 function JourneyView() {
   const [openDay, setOpenDay] = useState(null);
   const today = todayIso();
+  const wx = useWeather();
   return (
     <div>
       {days.map(day => {
@@ -418,6 +481,7 @@ function JourneyView() {
         const isOpen = openDay === day.num;
         const isToday = day.iso === today;
         const isPast = day.iso < today;
+        const dayWx = wx[day.iso] || null;
         return (
           <div key={day.num} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 14, width: 36, flexShrink: 0 }}>
@@ -427,15 +491,19 @@ function JourneyView() {
             <div onClick={() => setOpenDay(isOpen ? null : day.num)} style={{ flex: 1, background: isPast ? "rgba(122,170,124,0.06)" : C.white, border: `1px solid ${isToday ? C.gold : (isOpen ? color : C.riceDark)}`, borderRadius: 12, padding: "12px 14px", cursor: "pointer", boxShadow: isOpen ? `0 6px 24px ${color}22` : "0 1px 4px rgba(0,0,0,0.04)", transition: "all 0.2s" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: C.textGhost, fontWeight: 400, fontFamily: SANS, display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: C.textGhost, fontWeight: 400, fontFamily: SANS, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <span>{day.date}</span>
                     {isToday && <span style={{ background: C.gold, color: C.white, padding: "1px 7px", borderRadius: 10, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em" }}>TODAY</span>}
                     {isPast && <span style={{ color: C.moss, fontSize: 11 }}>✓</span>}
+                    {dayWx ? <span style={{ fontSize: 11 }}>{dayWx.icon} {dayWx.high}°<span style={{ color: C.textGhost, fontSize: 10 }}>/{dayWx.low}°</span></span> : <span style={{ fontSize: 10 }}>{BALI_AVG.icon} ~{BALI_AVG.high}°</span>}
                   </div>
                   <div style={{ fontFamily: SERIF, fontSize: 21, color: "#0f0a06", marginTop: 4, lineHeight: 1.25, fontWeight: 600 }}>{day.title}</div>
                   <div style={{ fontSize: 14, color: "#3a2a1a", marginTop: 6, lineHeight: 1.5, fontFamily: SANS }}>{day.anchor}</div>
                 </div>
-                <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", background: bg, color, padding: "3px 8px", borderRadius: 20, whiteSpace: "nowrap", flexShrink: 0, fontWeight: 600, fontFamily: SANS }}>{day.badge}</div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, flexShrink: 0 }}>
+                  <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", background: bg, color, padding: "3px 8px", borderRadius: 20, whiteSpace: "nowrap", fontWeight: 600, fontFamily: SANS }}>{day.badge}</div>
+                  {day.budgetAUD && <div style={{ fontSize: 10, color: C.textSoft, fontFamily: SANS, fontWeight: 600, background: C.riceDeep, padding: "2px 7px", borderRadius: 10 }}>~${day.budgetAUD}</div>}
+                </div>
               </div>
               {isOpen && (
                 <div style={{ borderTop: `1px solid ${C.riceDeep}`, marginTop: 12, paddingTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -444,12 +512,18 @@ function JourneyView() {
                       ✦ {day.summary}
                     </div>
                   )}
+                  {dayWx && (
+                    <div style={{ background: "rgba(59,130,184,0.07)", border: "1px solid rgba(59,130,184,0.2)", borderRadius: 8, padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 13, fontFamily: SANS, color: "#3a2a1a" }}>{dayWx.icon} {dayWx.label} · 💧 {dayWx.rain}% rain</span>
+                      <span style={{ fontSize: 13, color: "#3b82b8", fontFamily: SANS, fontWeight: 700 }}>{dayWx.high}° / {dayWx.low}°</span>
+                    </div>
+                  )}
                   <DayTimeline schedule={day.schedule} color={color} />
                   {day.schedule.map((s, i) => (
                     <div key={i} style={{ display: "grid", gridTemplateColumns: "55px 22px 1fr", gap: 10, alignItems: "baseline" }}>
                       <div style={{ fontFamily: SERIF, fontSize: 15, color: C.gold, textAlign: "right", fontWeight: 600 }}>{s.time}</div>
                       <div style={{ fontSize: 15, textAlign: "center" }}>{s.icon}</div>
-                      <div style={{ fontSize: 15, color: "#3a2a1a", lineHeight: 1.6, fontFamily: SANS }}>{s.act}</div>
+                      <div style={{ fontSize: 15, color: ACT_COLORS[s.icon] || "#3a2a1a", lineHeight: 1.6, fontFamily: SANS, fontWeight: ACT_COLORS[s.icon] ? 500 : 400 }}>{s.act}</div>
                     </div>
                   ))}
                   {day.photoMoments && (<>
@@ -493,6 +567,20 @@ function JourneyView() {
                       ))}
                     </div>
                   </>)}
+                  {day.venues && day.venues.length > 0 && (<>
+                    <div style={{ marginTop: 6, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: C.textGhost, fontWeight: 700, fontFamily: SANS }}>📞 Quick Contacts</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {day.venues.map((v, i) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, background: C.rice, borderRadius: 8, padding: "8px 10px" }}>
+                          <span style={{ fontSize: 13, color: "#3a2a1a", fontFamily: SANS, fontWeight: 500, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.name}</span>
+                          <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+                            {v.phone && <a href={`https://wa.me/${v.phone}`} onClick={e => e.stopPropagation()} target="_blank" rel="noreferrer" style={{ fontSize: 11, background: "#25d366", color: "#fff", padding: "4px 9px", borderRadius: 6, textDecoration: "none", fontFamily: SANS, fontWeight: 700 }}>💬</a>}
+                            {v.maps && <a href={`https://www.google.com/maps/search/?api=1&query=${v.maps}`} onClick={e => e.stopPropagation()} target="_blank" rel="noreferrer" style={{ fontSize: 11, background: "#4285f4", color: "#fff", padding: "4px 9px", borderRadius: 6, textDecoration: "none", fontFamily: SANS, fontWeight: 700 }}>📍</a>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>)}
                 </div>
               )}
             </div>
@@ -505,6 +593,7 @@ function JourneyView() {
 
 function DiningView() {
   const total = dining.reduce((sum, d) => sum + (d.costMid || 0), 0);
+  const [showTipping, setShowTipping] = useState(false);
   return (
     <div>
       <div style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, overflow: "hidden" }}>
@@ -520,12 +609,31 @@ function DiningView() {
         ))}
       </div>
       <Divider />
-      <div style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+      <div style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, padding: "14px 16px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
         <div>
           <div style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: C.textGhost, fontFamily: SANS, fontWeight: 600 }}>Est. dining total</div>
           <div style={{ fontSize: 11, color: C.textGhost, marginTop: 3, fontFamily: SANS }}>Midpoint of ranges · AUD · for two</div>
         </div>
         <div style={{ fontFamily: SERIF, fontSize: 26, color: C.ember, fontWeight: 600 }}>~${total}</div>
+      </div>
+      <div onClick={() => setShowTipping(p => !p)} style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, padding: "14px 16px", cursor: "pointer", userSelect: "none" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 14, color: "#3a2a1a", fontFamily: SANS, fontWeight: 600 }}>💰 Tipping Guide</div>
+          <span style={{ fontSize: 12, color: C.textGhost, fontFamily: SANS }}>{showTipping ? "▲ Hide" : "▼ Show"}</span>
+        </div>
+        {showTipping && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10, borderTop: `1px solid ${C.riceDeep}`, paddingTop: 12 }}>
+            {tipping.map((t, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, color: "#3a2a1a", fontFamily: SANS, fontWeight: 500 }}>{t.venue}</div>
+                  {t.note && <div style={{ fontSize: 12, color: C.textGhost, fontFamily: SANS, marginTop: 2 }}>{t.note}</div>}
+                </div>
+                <div style={{ fontSize: 12, color: C.moss, fontFamily: SANS, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>{t.amount}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
