@@ -72,11 +72,46 @@ const days = [
       { time: "13:30", icon: "💆", act: "Kaveri Spa — 4 Hands Massage (60 min) + Scrub + Botanical Bath (2 hrs)" },
       { time: "19:00", icon: "🍽", act: "Room service or Deeva Restaurant in-suite" },
     ] },
-  { num: 6, date: "Sun · Jun 7", iso: "2026-06-07", title: "Tis Cafe + Relax", type: "ubu", badge: "Ubud", anchor: "Tis Cafe 10:00 · relax afternoon · Deeva dinner",
+  { num: 6, date: "Sun · Jun 7", iso: "2026-06-07", title: "Tis Cafe + Ulu Petanu Waterfall", type: "ubu", badge: "Ubud", anchor: "Tis Cafe 08:30 · Ulu Petanu Waterfall · relax afternoon · Deeva dinner",
+    summary: "3 locations · 5.25 hrs active · 6 hrs rest · ~600k IDR / couple",
+    costs: [
+      { item: "Standard Pool Daybed (Tis Cafe)", note: "150k IDR / person · book ahead" },
+      { item: "Bali Swing (Tis Cafe)", note: "Included in daybed" },
+      { item: "Flying Dress Rental (optional)", note: "250k IDR / person · paid on-site" },
+      { item: "Ulu Petanu Waterfall Entry", note: "~50k IDR / person" },
+    ],
+    packingList: [
+      "Swimsuit on underneath your clothes",
+      "Dry change of clothes (for waterfall changing rooms)",
+      "Reef-safe sunscreen",
+      "Light cover-up or shirt",
+      "Waterproof phone case / underwater camera",
+      "Light cash IDR (entry + swing + optional dress rental)",
+    ],
+    photoMoments: [
+      { time: "08:30", desc: "Bamboo bridges, hanging nests + viewing decks — dry, morning light, zero crowds" },
+      { time: "10:30", desc: "Bali Swing over the valley — queue gone, lighting still golden" },
+      { time: "11:45–12:30", desc: "Ulu Petanu Waterfall — gorge shadows, dramatic natural framing" },
+    ],
+    tips: [
+      "Arrive at 08:25 (not 08:30) — swing queue forms by 10:45",
+      "Do the photo circuit first while you are completely dry and looking fresh",
+      "Waterfall gorge acts like natural A/C — arrive at midday for peak shade + cool",
+      "Use on-site changing rooms at waterfall before the 27-min drive back",
+      "Driver logistics (wait or return): leave it to them",
+    ],
     schedule: [
-      { time: "10:00", icon: "☕️", act: "Tis Cafe — lunch, swings, infinity pool (2–3 hrs)" },
-      { time: "13:00", icon: "🏊", act: "Return Udaya · long relax · shower · private pool · rest" },
-      { time: "19:30", icon: "🍽", act: "Deeva Restaurant in-house dinner" },
+      { time: "08:10", icon: "🏨", act: "Depart Udaya — swimsuits on under clothes, dry change in bag" },
+      { time: "08:30", icon: "📸", act: "Arrive Tis Cafe — photo circuit first: bamboo bridges, hanging nests, viewing decks (while dry + fresh)" },
+      { time: "09:00", icon: "🏊", act: "Settle into pool daybed — soak up the views, enjoy the sun" },
+      { time: "10:30", icon: "🎡", act: "Bali Swing over the valley — queue empty, lighting perfect · optional flying dress rental on-site" },
+      { time: "11:15", icon: "🧾", act: "Settle bill, dry off, meet driver" },
+      { time: "11:30", icon: "🚗", act: "14-min A/C drive to Ulu Petanu Waterfall" },
+      { time: "11:45", icon: "💧", act: "Ulu Petanu Waterfall — 90 steps down past koi pond · wade in sandy shallow pool inside deep jungle gorge" },
+      { time: "13:00", icon: "👗", act: "On-site changing rooms — slip into dry clothes before the drive back" },
+      { time: "13:15", icon: "🚗", act: "27-min drive back to The Udaya" },
+      { time: "13:45", icon: "🌿", act: "Back at Udaya — long shower, private pool, rest · light lunch if needed" },
+      { time: "19:30", icon: "🍽", act: "Deeva Restaurant — in-house dinner" },
     ] },
   { num: 7, date: "Mon · Jun 8", iso: "2026-06-08", title: "DADI ATV + Lunch at Udaya + INKA + Sayan House", type: "ubu", badge: "Ubud", anchor: "DADI 08:30 · lunch at Udaya · INKA · Sayan dinner",
     schedule: [
@@ -155,7 +190,7 @@ const bookings = [
   { title: "Book Sayan House — Jun 8, 19:00", sub: "No beef/pork/lamb · arrive 18:30 for sunset", tag: "soon" },
   { section: "Activities" },
   { title: "Book DADI BALI ADVENTURES — Jun 8, 08:30", sub: "Tandem ATV (90 min) · book night before", tag: "soon" },
-  { title: "Book Tis Cafe — Jun 7, 10:00", sub: "Lunch · swings · infinity pool · reserve table", tag: "soon" },
+  { title: "Book Tis Cafe — Jun 7, 08:30", sub: "Standard Pool Daybed (150k IDR/person) · Bali Swing incl · book ahead", tag: "soon" },
   { title: "Potato Head Beach Club — Jun 4", sub: "Arrive 16:00 · stay till late · dinner there", tag: "anytime" },
   { title: "Ku De Ta — Jun 5", sub: "Dinner 19:30 · arrive earlier for sunset", tag: "anytime" },
   { section: "Concierge (Udaya)" },
@@ -199,8 +234,8 @@ const driverPlan = [
   { section: "Transfer" },
   { day: "Jun 6", title: "Full day: Seminyak → Ubud", sub: "Concierge pre-arranged transfer · confirmed · ~$60–65", type: "confirmed", status: "done", costMid: 62 },
   { section: "Ubud" },
-  { day: "Jun 7", title: "Half day driver", sub: "Deeva dinner pickup/dropoff 19:30 · rest is free time · ~$20–25", type: "book", status: "todo", costMid: 22 },
-  { day: "Jun 8", title: "Full day driver", sub: "DADI 08:30 → Udaya lunch → INKA 14:00 → Sayan House 19:00 · ~$70–80", type: "book", status: "todo", costMid: 75 },
+  { day: "Jun 7", title: "Half day driver", sub: "Tis Cafe 08:10 → Waterfall 11:30 → Udaya 13:45 · Deeva pickup 19:30 · $40 flat", type: "book", status: "todo", costMid: 40 },
+  { day: "Jun 8", title: "Full day driver", sub: "DADI 08:30 → Udaya lunch → INKA 14:00 → Sayan House 19:00 · $60 flat", type: "book", status: "todo", costMid: 60 },
   { day: "Jun 9", title: "Short ride to BSI for IV Drip", sub: "Order Bluebird or Gojek · ~10:00 AM · Kaveri at Udaya · $0 driver needed rest of day", type: "bluebird", status: "na", costMid: 0 },
   { section: "Departure" },
   { day: "Jun 10", title: "Airport transfer Udaya → DPS", sub: "To be booked via Klook · depart 11:00", type: "book", status: "todo", costMid: 60 },
@@ -361,6 +396,11 @@ function JourneyView() {
               </div>
               {isOpen && (
                 <div style={{ borderTop: `1px solid ${C.riceDeep}`, marginTop: 12, paddingTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+                  {day.summary && (
+                    <div style={{ background: "rgba(184,136,42,0.08)", border: `1px solid ${C.gold}44`, borderRadius: 8, padding: "8px 12px", fontSize: 12, color: C.gold, fontFamily: SANS, fontWeight: 600 }}>
+                      ✦ {day.summary}
+                    </div>
+                  )}
                   {day.schedule.map((s, i) => (
                     <div key={i} style={{ display: "grid", gridTemplateColumns: "55px 22px 1fr", gap: 10, alignItems: "baseline" }}>
                       <div style={{ fontFamily: SERIF, fontSize: 15, color: C.gold, textAlign: "right", fontWeight: 600 }}>{s.time}</div>
@@ -368,6 +408,47 @@ function JourneyView() {
                       <div style={{ fontSize: 15, color: "#3a2a1a", lineHeight: 1.6, fontFamily: SANS }}>{s.act}</div>
                     </div>
                   ))}
+                  {day.photoMoments && (<>
+                    <div style={{ marginTop: 6, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: C.textGhost, fontWeight: 700, fontFamily: SANS }}>📸 Photo Moments</div>
+                    {day.photoMoments.map((p, i) => (
+                      <div key={i} style={{ display: "grid", gridTemplateColumns: "70px 1fr", gap: 10, alignItems: "baseline" }}>
+                        <div style={{ fontFamily: SERIF, fontSize: 12, color: C.ember, textAlign: "right", fontWeight: 600 }}>{p.time}</div>
+                        <div style={{ fontSize: 13, color: "#3a2a1a", lineHeight: 1.5, fontFamily: SANS }}>{p.desc}</div>
+                      </div>
+                    ))}
+                  </>)}
+                  {day.packingList && (<>
+                    <div style={{ marginTop: 6, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: C.textGhost, fontWeight: 700, fontFamily: SANS }}>🎒 What to Pack</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      {day.packingList.map((item, i) => (
+                        <div key={i} style={{ fontSize: 13, color: "#3a2a1a", fontFamily: SANS, display: "flex", gap: 8, alignItems: "flex-start" }}>
+                          <span style={{ color: C.moss, fontWeight: 700, marginTop: 1, flexShrink: 0 }}>✓</span>
+                          <span style={{ lineHeight: 1.5 }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>)}
+                  {day.costs && (<>
+                    <div style={{ marginTop: 6, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: C.textGhost, fontWeight: 700, fontFamily: SANS }}>💰 Costs</div>
+                    <div style={{ background: "rgba(45,74,46,0.05)", border: `1px solid ${C.moss}33`, borderRadius: 8, padding: "10px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
+                      {day.costs.map((c, i) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                          <span style={{ fontSize: 13, color: "#3a2a1a", fontFamily: SANS }}>{c.item}</span>
+                          <span style={{ fontSize: 12, color: C.moss, fontFamily: SANS, fontWeight: 600, whiteSpace: "nowrap", flexShrink: 0 }}>{c.note}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>)}
+                  {day.tips && (<>
+                    <div style={{ marginTop: 6, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: C.textGhost, fontWeight: 700, fontFamily: SANS }}>💡 Pro Tips</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {day.tips.map((tip, i) => (
+                        <div key={i} style={{ fontSize: 13, color: "#3a2a1a", fontFamily: SANS, lineHeight: 1.5, background: "rgba(196,99,58,0.05)", borderLeft: `3px solid ${C.ember}55`, paddingLeft: 10, paddingTop: 5, paddingBottom: 5, borderRadius: "0 6px 6px 0" }}>
+                          💡 {tip}
+                        </div>
+                      ))}
+                    </div>
+                  </>)}
                 </div>
               )}
             </div>
