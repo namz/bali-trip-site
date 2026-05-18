@@ -38,7 +38,7 @@ const TRIP_END_ISO = "2026-06-10";
 const days = [
   { num: 1, date: "Tue · Jun 2", iso: "2026-06-02", title: "Arrival + Hydrafacial", type: "sem", badge: "Seminyak", anchor: "Land 10:35 · Signature Hydrafacial · Shelter dinner",
     schedule: [
-      { time: "10:35", icon: "✈️", act: "Land DPS — Monolocale pre-arranged pickup" },
+      { time: "10:35", icon: "✈️", act: "Land DPS — Klook pickup · meet at Klook kiosk" },
       { time: "12:00", icon: "🏨", act: "Check in · shower · decompress" },
       { time: "16:30", icon: "💆", act: "Bodylabs — Signature Hydrafacial" },
       { time: "19:00", icon: "🍽", act: "Dinner: Shelter Restaurant — modern Australian-Asian" },
@@ -170,7 +170,7 @@ const bookings = [
   { title: "Book flights MEL → DPS → MEL", sub: "Land DPS ~10:35 on Jun 2. Return Jun 10 PM.", tag: "urgent" },
   { title: "Confirm Monolocale Resort & Spa — Jun 2–6", sub: "Seminyak · 4 nights", tag: "urgent" },
   { title: "Confirm The Udaya — Jun 6–10", sub: "Jungle Pool Suite · 4 nights · daily fruit basket", tag: "urgent" },
-  { title: "Arrange airport pickup with Monolocale — Jun 2", sub: "No Grab at DPS — hotel pre-arranged only", tag: "urgent" },
+  { title: "Book airport pickup via Klook — Jun 2", sub: "Meet at Klook kiosk at DPS · no Grab at airport", tag: "urgent" },
   { section: "Treatments & Spa" },
   { title: "Book Bodylabs — Jun 2, 16:30", sub: "Signature Hydrafacial · Seminyak", tag: "urgent" },
   { title: "Book Svaha Spa — Jun 3, 11:00", sub: "Ear Candle + Back Massage + Javanese Body Scrub (~2.5 hrs)", tag: "urgent" },
@@ -364,6 +364,49 @@ function SectionHead({ label }) {
 // ============================================
 // VIEWS
 // ============================================
+function DayTimeline({ schedule, color }) {
+  const parseTime = (t) => {
+    if (!t || t === "PM") return null;
+    const parts = t.split(":");
+    if (parts.length < 2) return null;
+    const h = parseInt(parts[0]);
+    const m = parseInt(parts[1]);
+    if (isNaN(h) || isNaN(m)) return null;
+    return h * 60 + m;
+  };
+  const events = schedule.map(s => ({ ...s, mins: parseTime(s.time) })).filter(s => s.mins !== null);
+  if (events.length < 2) return null;
+  const start = events[0].mins;
+  const end = events[events.length - 1].mins;
+  const total = end - start;
+  if (total <= 0) return null;
+  const segments = events.slice(0, -1).map((ev, i) => {
+    const dur = events[i + 1].mins - ev.mins;
+    return { icon: ev.icon, time: ev.time, act: ev.act, pct: Math.max((dur / total) * 100, 3) };
+  });
+  const totalDisplay = total >= 60 ? `${Math.floor(total / 60)}h${total % 60 ? ` ${total % 60}m` : ""}` : `${total}m`;
+  return (
+    <div style={{ margin: "2px 0 10px" }}>
+      <div style={{ fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: C.textGhost, fontWeight: 700, fontFamily: SANS, marginBottom: 8 }}>⏱ Day Flow</div>
+      <div style={{ display: "flex", gap: 2, height: 36, borderRadius: 8, overflow: "hidden" }}>
+        {segments.map((seg, i) => {
+          const lightnessHex = Math.round((0.3 + (i / segments.length) * 0.7) * 255).toString(16).padStart(2, "0");
+          return (
+            <div key={i} title={`${seg.time} · ${seg.act}`} style={{ flex: `${seg.pct} 0 0`, background: `${color}${lightnessHex}`, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: i === 0 ? "8px 0 0 8px" : i === segments.length - 1 ? "0 8px 8px 0" : 0, fontSize: seg.pct > 7 ? 14 : 9, cursor: "default" }}>
+              {seg.pct > 5 && <span>{seg.icon}</span>}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5, alignItems: "center" }}>
+        <span style={{ fontSize: 10, color: C.textGhost, fontFamily: SANS, fontWeight: 500 }}>{events[0].time}</span>
+        <span style={{ fontSize: 10, color: C.gold, fontFamily: SANS, fontWeight: 700 }}>{totalDisplay}</span>
+        <span style={{ fontSize: 10, color: C.textGhost, fontFamily: SANS, fontWeight: 500 }}>{events[events.length - 1].time}</span>
+      </div>
+    </div>
+  );
+}
+
 function JourneyView() {
   const [openDay, setOpenDay] = useState(null);
   const today = todayIso();
@@ -401,6 +444,7 @@ function JourneyView() {
                       ✦ {day.summary}
                     </div>
                   )}
+                  <DayTimeline schedule={day.schedule} color={color} />
                   {day.schedule.map((s, i) => (
                     <div key={i} style={{ display: "grid", gridTemplateColumns: "55px 22px 1fr", gap: 10, alignItems: "baseline" }}>
                       <div style={{ fontFamily: SERIF, fontSize: 15, color: C.gold, textAlign: "right", fontWeight: 600 }}>{s.time}</div>
