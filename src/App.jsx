@@ -344,6 +344,128 @@ function getTripStatus() {
   return { phase: "during", label: `Day ${dayNum} of 9` };
 }
 
+// Live ticking clock — used for countdowns and overdue checks
+function useNow(intervalMs = 30000) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return now;
+}
+
+function getCountdown(now) {
+  const todayStr = now.toISOString().slice(0, 10);
+  // Flight departs Melbourne 6:35am Jun 2 (AEST = UTC+10)
+  const startMs = new Date(TRIP_START_ISO + "T06:35:00+10:00").getTime();
+  if (todayStr < TRIP_START_ISO) {
+    const diff = startMs - now.getTime();
+    return {
+      phase: "pre",
+      days: Math.floor(diff / 86400000),
+      hours: Math.floor((diff % 86400000) / 3600000),
+      mins: Math.floor((diff % 3600000) / 60000),
+    };
+  }
+  if (todayStr > TRIP_END_ISO) return { phase: "post" };
+  const dayNum = Math.floor((new Date(todayStr).getTime() - new Date(TRIP_START_ISO).getTime()) / 86400000) + 1;
+  const todayObj = days.find(d => d.iso === todayStr);
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const next = todayObj ? todayObj.schedule.find(s => {
+    const p = (s.time || "").split(":");
+    if (p.length !== 2) return false;
+    const m = parseInt(p[0]) * 60 + parseInt(p[1]);
+    return !isNaN(m) && m > nowMins;
+  }) : null;
+  return { phase: "during", dayNum, location: todayObj?.badge, next };
+}
+
+// Parse "Jun 2, 16:30" / "Jun 9" patterns from titles & subs
+const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+function parseDateInText(text, year = 2026) {
+  if (!text) return null;
+  const m = text.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})(?:[,\s]+(\d{1,2}):(\d{2}))?/);
+  if (!m) return null;
+  const month = MONTHS[m[1]];
+  if (month === undefined) return null;
+  const day = parseInt(m[2]);
+  const hour = m[3] ? parseInt(m[3]) : null;
+  const min = m[4] ? parseInt(m[4]) : null;
+  return {
+    monthName: m[1], day, hour, min,
+    hasTime: hour !== null,
+    iso: `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+    // Bali is UTC+8 — express the event in UTC
+    utc: hour !== null ? new Date(Date.UTC(year, month, day, hour - 8, min || 0)) : new Date(Date.UTC(year, month, day, 0, 0)),
+  };
+}
+
+function parsePhone(text) {
+  if (!text) return null;
+  const m = text.match(/\+?62[\d\s-]{7,15}/);
+  if (!m) return null;
+  return m[0].replace(/[\s\-+]/g, "");
+}
+
+// Build an .ics file string for a single event
+function pad2(n) { return String(n).padStart(2, "0"); }
+function toIcsUtc(d) {
+  return `${d.getUTCFullYear()}${pad2(d.getUTCMonth() + 1)}${pad2(d.getUTCDate())}T${pad2(d.getUTCHours())}${pad2(d.getUTCMinutes())}00Z`;
+}
+function buildIcs({ uid, title, description, location, startUtc, durationMins = 90 }) {
+  const endUtc = new Date(startUtc.getTime() + durationMins * 60000);
+  const clean = (s) => (s || "").replace(/[\r\n,;]/g, " ").slice(0, 200);
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Bali Trip//EN",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    `UID:${uid}@bali-trip.app`,
+    `DTSTAMP:${toIcsUtc(new Date())}`,
+    `DTSTART:${toIcsUtc(startUtc)}`,
+    `DTEND:${toIcsUtc(endUtc)}`,
+    `SUMMARY:${clean(title)}`,
+    description ? `DESCRIPTION:${clean(description)}` : "",
+    location ? `LOCATION:${clean(location)}` : "",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].filter(Boolean).join("\r\n");
+}
+function downloadIcs(filename, content) {
+  const blob = new Blob([content], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+// Live AUD↔IDR rate
+function useCurrencyRate() {
+  const [rate, setRate] = useState(12500);
+  useEffect(() => {
+    fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/aud.json")
+      .then(r => r.json())
+      .then(d => { if (d?.aud?.idr) setRate(d.aud.idr); })
+      .catch(() => {});
+  }, []);
+  return rate;
+}
+
+// Task filter config — for Tasks tab pills
+const TASK_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "todo", label: "To-do" },
+  { id: "urgent", label: "Book", tag: "urgent" },
+  { id: "soon", label: "Soon", tag: "soon" },
+  { id: "pharm-au", label: "Pharm AU", section: "Pharmacy — Buy in Australia 🇦🇺" },
+  { id: "pharm-bali", label: "Pharm Bali", section: "Pharmacy — Buy in Bali 🏝️" },
+];
+
 // ============================================
 // UI ATOMS
 // ============================================
@@ -385,7 +507,7 @@ function SyncIndicator({ status }) {
   const map = {
     syncing: { color: C.gold, label: "Syncing…", dot: true },
     synced: { color: C.moss, label: "Synced", dot: false },
-    offline: { color: C.ember, label: "Offline · changes saved locally", dot: false },
+    offline: { color: "#4a7a4c", label: "✓ Working offline · cached", dot: false },
     error: { color: C.ember, label: "Sync error · retrying", dot: true },
   };
   const cfg = map[status] || map.synced;
@@ -420,6 +542,242 @@ function SectionHead({ label }) {
     <div style={{ padding: "16px 4px 8px", fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: C.textGhost, fontWeight: 600, marginTop: 8, fontFamily: SANS, display: "flex", alignItems: "center", gap: 10 }}>
       <span>{label}</span>
       <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${C.riceDark}, transparent)` }} />
+    </div>
+  );
+}
+
+// ============================================
+// NEW: COUNTDOWN BANNER (header)
+// ============================================
+function CountdownBanner() {
+  const now = useNow(30000);
+  const cd = getCountdown(now);
+
+  if (cd.phase === "post") {
+    return (
+      <div style={{ marginTop: 14, display: "inline-block", padding: "5px 14px", background: "rgba(184,136,42,0.18)", border: "1px solid rgba(212,170,80,0.4)", borderRadius: 20, fontSize: 11, letterSpacing: "0.12em", color: "#d4aa50", textTransform: "uppercase", fontFamily: SANS, fontWeight: 600 }}>
+        Trip complete ✦
+      </div>
+    );
+  }
+
+  if (cd.phase === "pre") {
+    return (
+      <div style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "rgba(184,136,42,0.18)", border: "1px solid rgba(212,170,80,0.4)", borderRadius: 22, fontFamily: SANS }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+          <span style={{ fontSize: 24, fontFamily: SERIF, color: "#d4aa50", fontWeight: 700, lineHeight: 1 }}>{cd.days}</span>
+          <span style={{ fontSize: 9, letterSpacing: "0.15em", color: "rgba(212,170,80,0.8)", textTransform: "uppercase" }}>d</span>
+        </div>
+        <span style={{ width: 1, height: 18, background: "rgba(212,170,80,0.3)" }} />
+        <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+          <span style={{ fontSize: 18, fontFamily: SERIF, color: "#d4aa50", fontWeight: 700, lineHeight: 1 }}>{cd.hours}</span>
+          <span style={{ fontSize: 9, letterSpacing: "0.15em", color: "rgba(212,170,80,0.8)", textTransform: "uppercase" }}>h</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+          <span style={{ fontSize: 18, fontFamily: SERIF, color: "rgba(212,170,80,0.75)", fontWeight: 600, lineHeight: 1 }}>{cd.mins}</span>
+          <span style={{ fontSize: 9, letterSpacing: "0.15em", color: "rgba(212,170,80,0.6)", textTransform: "uppercase" }}>m</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 14, display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "9px 20px", background: "rgba(184,136,42,0.18)", border: "1px solid rgba(212,170,80,0.4)", borderRadius: 22, fontFamily: SANS, maxWidth: 340 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ fontSize: 11, letterSpacing: "0.18em", color: "#d4aa50", textTransform: "uppercase", fontWeight: 700 }}>Day {cd.dayNum} of 9</span>
+        {cd.location && <><span style={{ color: "rgba(212,170,80,0.4)" }}>·</span><span style={{ fontSize: 11, letterSpacing: "0.1em", color: "#d4aa50", textTransform: "uppercase", fontWeight: 600 }}>{cd.location}</span></>}
+      </div>
+      {cd.next && (
+        <div style={{ fontSize: 11, color: "rgba(212,170,80,0.9)", textAlign: "center", fontFamily: SANS, marginTop: 2, lineHeight: 1.4 }}>
+          Up next: <span style={{ fontWeight: 700 }}>{cd.next.time}</span> · {cd.next.icon} {cd.next.act.length > 38 ? cd.next.act.slice(0, 38) + "…" : cd.next.act}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// NEW: PROGRESS RING (Tasks tab)
+// ============================================
+function ProgressRing({ value, max, label, color }) {
+  const pct = max > 0 ? value / max : 0;
+  const size = 96, stroke = 9;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - pct * c;
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={C.riceDeep} strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.5s ease, stroke 0.5s ease" }} />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 700, color, lineHeight: 1 }}>{value}<span style={{ color: C.textGhost, fontSize: 14, fontWeight: 500 }}>/{max}</span></div>
+        <div style={{ fontSize: 8, letterSpacing: "0.18em", textTransform: "uppercase", color: C.textGhost, fontFamily: SANS, marginTop: 4, fontWeight: 700 }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// NEW: FILTER PILLS (Tasks tab)
+// ============================================
+function FilterPills({ filters, active, setActive }) {
+  return (
+    <div style={{ display: "flex", gap: 6, overflowX: "auto", marginBottom: 12, paddingBottom: 4, scrollbarWidth: "none", msOverflowStyle: "none" }}>
+      <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+      {filters.map(f => {
+        const on = active === f.id;
+        return (
+          <button key={f.id} onClick={() => setActive(f.id)} style={{ flexShrink: 0, padding: "6px 13px", border: `1px solid ${on ? C.ember : C.riceDark}`, borderRadius: 16, background: on ? C.ember : C.white, color: on ? C.white : C.textSoft, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: SANS, transition: "all 0.15s", whiteSpace: "nowrap" }}>
+            {f.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ============================================
+// NEW: CURRENCY WIDGET (floating)
+// ============================================
+function CurrencyWidget() {
+  const rate = useCurrencyRate();
+  const [open, setOpen] = useState(false);
+  const [aud, setAud] = useState("1");
+  const [idr, setIdr] = useState("");
+
+  useEffect(() => {
+    const n = parseFloat(aud.replace(/,/g, ""));
+    if (!isNaN(n)) setIdr(Math.round(n * rate).toLocaleString("en-AU"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rate]);
+
+  const onAud = (v) => {
+    setAud(v);
+    const n = parseFloat(v.replace(/,/g, ""));
+    if (!isNaN(n)) setIdr(Math.round(n * rate).toLocaleString("en-AU"));
+    else setIdr("");
+  };
+  const onIdr = (v) => {
+    setIdr(v);
+    const n = parseFloat(v.replace(/[^\d.]/g, ""));
+    if (!isNaN(n)) setAud((n / rate).toFixed(2));
+    else setAud("");
+  };
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} aria-label="Open currency converter" style={{ position: "fixed", bottom: 18, right: 18, width: 54, height: 54, borderRadius: 27, background: C.gold, color: C.white, border: "none", boxShadow: "0 4px 18px rgba(0,0,0,0.25)", cursor: "pointer", fontSize: 16, fontWeight: 800, zIndex: 50, fontFamily: SANS }}>
+        $↔
+      </button>
+    );
+  }
+  return (
+    <div style={{ position: "fixed", bottom: 18, right: 18, background: C.white, border: `2px solid ${C.gold}`, borderRadius: 14, padding: "12px 14px", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", zIndex: 50, width: 240, fontFamily: SANS }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <span style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: C.gold, fontWeight: 700 }}>Currency</span>
+        <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", fontSize: 20, color: C.textGhost, cursor: "pointer", lineHeight: 1, padding: 0 }}>×</button>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.rice, border: `1px solid ${C.riceDeep}`, borderRadius: 8, padding: "7px 10px" }}>
+          <span style={{ fontSize: 11, color: C.textGhost, fontWeight: 700, width: 30 }}>AUD</span>
+          <input value={aud} onChange={e => onAud(e.target.value)} inputMode="decimal" style={{ flex: 1, minWidth: 0, border: "none", background: "transparent", outline: "none", fontSize: 15, fontFamily: SANS, fontWeight: 600, color: C.text }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.rice, border: `1px solid ${C.riceDeep}`, borderRadius: 8, padding: "7px 10px" }}>
+          <span style={{ fontSize: 11, color: C.textGhost, fontWeight: 700, width: 30 }}>IDR</span>
+          <input value={idr} onChange={e => onIdr(e.target.value)} inputMode="numeric" style={{ flex: 1, minWidth: 0, border: "none", background: "transparent", outline: "none", fontSize: 15, fontFamily: SANS, fontWeight: 600, color: C.text }} />
+        </div>
+      </div>
+      <div style={{ fontSize: 10, color: C.textGhost, marginTop: 8, textAlign: "center" }}>1 AUD ≈ {Math.round(rate).toLocaleString("en-AU")} IDR</div>
+    </div>
+  );
+}
+
+// ============================================
+// NEW: ACTUAL PAID INPUT (Dining / Cars)
+// ============================================
+function ActualPaidInput({ k, expected, actuals, setActuals }) {
+  const val = actuals && actuals[k] != null ? String(actuals[k]) : "";
+  const onChange = (v) => {
+    const clean = v.replace(/[^\d.]/g, "");
+    setActuals(prev => {
+      const next = { ...(prev || {}) };
+      if (clean === "") delete next[k];
+      else next[k] = parseFloat(clean) || 0;
+      return next;
+    });
+  };
+  return (
+    <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 5, background: C.rice, border: `1px solid ${val ? C.moss : C.riceDeep}`, borderRadius: 6, padding: "3px 7px", marginTop: 4 }}>
+      <span style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: C.textGhost, fontWeight: 700, fontFamily: SANS }}>Paid</span>
+      <span style={{ fontSize: 11, color: C.textSoft, fontFamily: SANS, fontWeight: 700 }}>$</span>
+      <input value={val} onChange={e => onChange(e.target.value)} inputMode="decimal" placeholder={String(expected)} style={{ flex: 1, minWidth: 0, width: 50, border: "none", background: "transparent", outline: "none", fontSize: 12, fontFamily: SANS, fontWeight: 600, color: val ? C.moss : C.textSoft, padding: 0 }} />
+    </div>
+  );
+}
+
+// ============================================
+// NEW: CALENDAR EXPORT BUTTON
+// ============================================
+function CalButton({ uid, title, description, location, dateInfo, durationMins = 90 }) {
+  if (!dateInfo || !dateInfo.hasTime) return null;
+  const onClick = (e) => {
+    e.stopPropagation();
+    const ics = buildIcs({ uid, title, description, location, startUtc: dateInfo.utc, durationMins });
+    const slug = uid.toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 30);
+    downloadIcs(`bali-${slug}.ics`, ics);
+  };
+  return (
+    <button onClick={onClick} title="Add to calendar" style={{ fontSize: 11, background: "rgba(45,74,46,0.1)", color: C.moss, border: `1px solid ${C.moss}33`, padding: "3px 8px", borderRadius: 6, fontFamily: SANS, fontWeight: 700, cursor: "pointer" }}>📅</button>
+  );
+}
+
+// ============================================
+// NEW: CONTACT BUTTONS (WhatsApp inline)
+// ============================================
+function ContactButtons({ phone }) {
+  if (!phone) return null;
+  return (
+    <a href={`https://wa.me/${phone}`} onClick={e => e.stopPropagation()} target="_blank" rel="noreferrer" title="WhatsApp" style={{ fontSize: 11, background: "#25d366", color: "#fff", padding: "3px 8px", borderRadius: 6, textDecoration: "none", fontFamily: SANS, fontWeight: 700, display: "inline-block" }}>💬</a>
+  );
+}
+
+// ============================================
+// NEW: PRE-FLIGHT CARD (24h before)
+// ============================================
+function PreFlightCard() {
+  const now = useNow(60000);
+  const startMs = new Date(TRIP_START_ISO + "T06:35:00+10:00").getTime();
+  const diff = startMs - now.getTime();
+  // Show only in the 24h before departure
+  if (diff <= 0 || diff > 86400000) return null;
+  const hours = Math.floor(diff / 3600000);
+  const items = [
+    "Passport + e-VOA QR saved offline",
+    "Indonesia Arrival Card e-CD submitted",
+    "Bali Tourist Levy paid · QR saved",
+    "AUD cash to exchange at airport",
+    "Phone eSIM ready · activate on landing",
+    "Bluebird + Gojek apps installed + cards added",
+    "Bali offline Google Maps downloaded",
+    "Travelan started (48 hr before each meal)",
+    "Charger + adapter (Type C/F) packed",
+    "Sunscreen + DEET + Compeed in carry-on",
+  ];
+  return (
+    <div style={{ background: "linear-gradient(135deg, rgba(196,99,58,0.08), rgba(184,136,42,0.06))", border: `2px solid ${C.ember}`, borderRadius: 12, padding: "14px 16px", marginBottom: 16, position: "relative" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <span style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: C.ember, fontWeight: 700, fontFamily: SANS }}>✈️ Pre-Flight · {hours}h to go</span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {items.map((it, i) => (
+          <div key={i} style={{ fontSize: 13, color: "#3a2a1a", fontFamily: SANS, display: "flex", gap: 8, alignItems: "flex-start", lineHeight: 1.5 }}>
+            <span style={{ color: C.ember, fontWeight: 700, marginTop: 1, flexShrink: 0 }}>◯</span>
+            <span>{it}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -471,19 +829,39 @@ function DayTimeline({ schedule, color }) {
 }
 
 function JourneyView() {
-  const [openDay, setOpenDay] = useState(null);
   const today = todayIso();
+  // Auto-open today's card if we're in the trip; else open nothing
+  const initialOpen = useMemo(() => {
+    const t = days.find(d => d.iso === today);
+    return t ? t.num : null;
+  }, [today]);
+  const [openDay, setOpenDay] = useState(initialOpen);
+  const [showPast, setShowPast] = useState(false);
   const wx = useWeather();
-  return (
-    <div>
-      {days.map(day => {
-        const color = typeColor[day.type] || C.ember;
-        const bg = typeBg[day.type] || "rgba(196,99,58,0.1)";
-        const isOpen = openDay === day.num;
-        const isToday = day.iso === today;
-        const isPast = day.iso < today;
-        const dayWx = wx[day.iso] || null;
-        return (
+  const now = useNow(60000);
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+
+  const upcomingDays = days.filter(d => d.iso >= today);
+  const pastDays = days.filter(d => d.iso < today);
+
+  const renderDay = (day) => {
+    const color = typeColor[day.type] || C.ember;
+    const bg = typeBg[day.type] || "rgba(196,99,58,0.1)";
+    const isOpen = openDay === day.num;
+    const isToday = day.iso === today;
+    const isPast = day.iso < today;
+    const dayWx = wx[day.iso] || null;
+    // Compute "next up" schedule item for today
+    let nextUpIdx = -1;
+    if (isToday) {
+      nextUpIdx = day.schedule.findIndex(s => {
+        const p = (s.time || "").split(":");
+        if (p.length !== 2) return false;
+        const m = parseInt(p[0]) * 60 + parseInt(p[1]);
+        return !isNaN(m) && m > nowMins;
+      });
+    }
+    return (
           <div key={day.num} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 14, width: 36, flexShrink: 0 }}>
               <div style={{ width: 34, height: 34, borderRadius: "50%", background: isPast ? C.riceDeep : color, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SERIF, fontSize: 15, color: isPast ? C.textGhost : C.white, boxShadow: isOpen ? `0 0 0 3px ${bg}` : (isToday ? `0 0 0 3px rgba(184,136,42,0.4)` : "none"), fontWeight: 600 }}>{day.num}</div>
@@ -520,13 +898,19 @@ function JourneyView() {
                     </div>
                   )}
                   <DayTimeline schedule={day.schedule} color={color} />
-                  {day.schedule.map((s, i) => (
-                    <div key={i} style={{ display: "grid", gridTemplateColumns: "55px 22px 1fr", gap: 10, alignItems: "baseline" }}>
-                      <div style={{ fontFamily: SERIF, fontSize: 15, color: C.gold, textAlign: "right", fontWeight: 600 }}>{s.time}</div>
+                  {day.schedule.map((s, i) => {
+                    const isNext = isToday && i === nextUpIdx;
+                    const isDone = isToday && nextUpIdx >= 0 && i < nextUpIdx;
+                    return (
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "55px 22px 1fr", gap: 10, alignItems: "baseline", padding: isNext ? "6px 8px" : "0", background: isNext ? "rgba(184,136,42,0.12)" : "transparent", border: isNext ? `1px solid ${C.gold}66` : "1px solid transparent", borderRadius: 8, opacity: isDone ? 0.5 : 1, transition: "all 0.2s" }}>
+                      <div style={{ fontFamily: SERIF, fontSize: 15, color: isNext ? C.ember : C.gold, textAlign: "right", fontWeight: isNext ? 700 : 600 }}>{s.time}</div>
                       <div style={{ fontSize: 15, textAlign: "center" }}>{s.icon}</div>
-                      <div style={{ fontSize: 15, color: ACT_COLORS[s.icon] || "#3a2a1a", lineHeight: 1.6, fontFamily: SANS, fontWeight: ACT_COLORS[s.icon] ? 500 : 400 }}>{s.act}</div>
+                      <div style={{ fontSize: 15, color: ACT_COLORS[s.icon] || "#3a2a1a", lineHeight: 1.6, fontFamily: SANS, fontWeight: isNext ? 700 : (ACT_COLORS[s.icon] ? 500 : 400), textDecoration: isDone ? "line-through" : "none", textDecorationColor: "#7aaa7c" }}>
+                        {isNext && <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: C.ember, fontWeight: 800, marginRight: 6 }}>Up Next ▸</span>}
+                        {s.act}
+                      </div>
                     </div>
-                  ))}
+                  );})}
                   {day.photoMoments && (<>
                     <div style={{ marginTop: 6, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", color: C.textGhost, fontWeight: 700, fontFamily: SANS }}>📸 Photo Moments</div>
                     {day.photoMoments.map((p, i) => (
@@ -587,35 +971,64 @@ function JourneyView() {
             </div>
           </div>
         );
-      })}
+  };
+
+  return (
+    <div>
+      {upcomingDays.map(renderDay)}
+      {pastDays.length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <div onClick={() => setShowPast(p => !p)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "rgba(122,170,124,0.08)", border: `1px solid ${C.riceDark}`, borderRadius: 10, cursor: "pointer", userSelect: "none", marginBottom: showPast ? 10 : 0 }}>
+            <span style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: C.moss, fontWeight: 700, fontFamily: SANS, flex: 1 }}>✓ Past · {pastDays.length} {pastDays.length === 1 ? "day" : "days"}</span>
+            <span style={{ fontSize: 12, color: C.textGhost, fontFamily: SANS }}>{showPast ? "▲ Hide" : "▼ Show"}</span>
+          </div>
+          {showPast && pastDays.map(renderDay)}
+        </div>
+      )}
     </div>
   );
 }
 
-function DiningView() {
-  const total = dining.reduce((sum, d) => sum + (d.costMid || 0), 0);
+function DiningView({ actuals, setActuals }) {
   const [showTipping, setShowTipping] = useState(false);
+  // Total: actual where present, expected otherwise
+  const total = dining.reduce((sum, d, i) => {
+    const k = `dn${i}`;
+    const a = actuals && actuals[k];
+    return sum + (a != null ? a : (d.costMid || 0));
+  }, 0);
+  const expectedTotal = dining.reduce((sum, d) => sum + (d.costMid || 0), 0);
+  const anyActuals = actuals && Object.keys(actuals).some(k => k.startsWith("dn"));
   return (
     <div>
+      <div style={{ background: "rgba(184,136,42,0.08)", border: `1px solid ${C.gold}55`, borderRadius: 10, padding: "10px 14px", marginBottom: 12, fontSize: 12, color: C.gold, fontFamily: SANS, fontWeight: 600, lineHeight: 1.5, display: "flex", gap: 10, alignItems: "flex-start" }}>
+        <span style={{ fontSize: 16 }}>ⓘ</span>
+        <span><b>Tax & tip</b> in Bali: most restaurants add <b>+11% PB1 tax</b> and many include <b>5–10% service</b>. Always check the bill before tipping again. Cash tip to the server if service isn't included.</span>
+      </div>
       <div style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, overflow: "hidden" }}>
-        {dining.map((d, i) => (
-          <div key={i} style={{ display: "grid", gridTemplateColumns: "48px 1fr auto", alignItems: "center", gap: 12, padding: "16px 16px", borderBottom: i < dining.length - 1 ? `1px solid ${C.riceDeep}` : "none" }}>
+        {dining.map((d, i) => {
+          const k = `dn${i}`;
+          return (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "48px 1fr auto", alignItems: "center", gap: 12, padding: "14px 16px", borderBottom: i < dining.length - 1 ? `1px solid ${C.riceDeep}` : "none" }}>
             <div style={{ fontFamily: SERIF, fontSize: 28, color: C.riceDark, textAlign: "center", fontWeight: 600 }}>{d.day}</div>
             <div>
               <div style={{ fontFamily: SERIF, fontSize: 18, color: "#0f0a06", fontWeight: 600 }}>{d.name}</div>
               <div style={{ fontSize: 14, color: "#5a4a30", marginTop: 3, lineHeight: 1.5, fontFamily: SANS }}>{d.type}</div>
             </div>
-            <div style={{ fontSize: 14, color: C.gold, textAlign: "right", fontWeight: 500, fontFamily: SANS }}>{d.cost}</div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, minWidth: 90 }}>
+              <div style={{ fontSize: 13, color: C.gold, fontWeight: 500, fontFamily: SANS, whiteSpace: "nowrap" }}>{d.cost}</div>
+              {d.costMid > 0 && <ActualPaidInput k={k} expected={d.costMid} actuals={actuals} setActuals={setActuals} />}
+            </div>
           </div>
-        ))}
+        );})}
       </div>
       <Divider />
       <div style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, padding: "14px 16px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
         <div>
-          <div style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: C.textGhost, fontFamily: SANS, fontWeight: 600 }}>Est. dining total</div>
-          <div style={{ fontSize: 11, color: C.textGhost, marginTop: 3, fontFamily: SANS }}>Midpoint of ranges · AUD · for two</div>
+          <div style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: C.textGhost, fontFamily: SANS, fontWeight: 600 }}>{anyActuals ? "Running total" : "Est. dining total"}</div>
+          <div style={{ fontSize: 11, color: C.textGhost, marginTop: 3, fontFamily: SANS }}>{anyActuals ? `Actuals + estimates · was ~$${expectedTotal}` : "Midpoint of ranges · AUD · for two"}</div>
         </div>
-        <div style={{ fontFamily: SERIF, fontSize: 26, color: C.ember, fontWeight: 600 }}>~${total}</div>
+        <div style={{ fontFamily: SERIF, fontSize: 26, color: C.ember, fontWeight: 600 }}>{anyActuals ? "$" : "~$"}{Math.round(total)}</div>
       </div>
       <div onClick={() => setShowTipping(p => !p)} style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, padding: "14px 16px", cursor: "pointer", userSelect: "none" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -674,7 +1087,10 @@ function ChecklistView({ notes, setNotes, checked, setChecked }) {
   const pct = total > 0 ? (done / total) * 100 : 0;
   const isComplete = done === total && total > 0;
   const [celebrate, setCelebrate] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const [showDone, setShowDone] = useState(false);
   const prevComplete = useRef(false);
+  const now = useNow(60000);
 
   useEffect(() => {
     if (isComplete && !prevComplete.current) {
@@ -686,36 +1102,78 @@ function ChecklistView({ notes, setNotes, checked, setChecked }) {
     if (!isComplete) prevComplete.current = false;
   }, [isComplete]);
 
-  const barColor = pct < 33 ? C.ember : pct < 75 ? C.gold : C.moss;
+  const ringColor = pct < 33 ? C.ember : pct < 75 ? C.gold : C.moss;
 
+  // Pre-compute section context for each item (for filter + iso parsing)
+  const itemContext = useMemo(() => {
+    let currentSection = "";
+    return bookings.map(b => {
+      if (b.section) { currentSection = b.section; return { section: currentSection }; }
+      const dateInfo = parseDateInText(b.title) || parseDateInText(b.sub);
+      return { section: currentSection, dateInfo };
+    });
+  }, []);
+
+  // Filter
+  const filterCfg = TASK_FILTERS.find(f => f.id === filter) || TASK_FILTERS[0];
+  const passesFilter = (item, i) => {
+    if (item.section) return false; // handled at section render
+    if (filter === "all") return true;
+    if (filter === "todo") return !(checked && checked[`i${i}`]);
+    if (filterCfg.tag) return item.tag === filterCfg.tag;
+    if (filterCfg.section) return itemContext[i].section === filterCfg.section;
+    return true;
+  };
+
+  // Build the visible items list grouped by section
+  const sectionMap = useMemo(() => {
+    const map = {};
+    let currentSection = "";
+    bookings.forEach((b, i) => {
+      if (b.section) { currentSection = b.section; map[currentSection] = []; return; }
+      if (!map[currentSection]) map[currentSection] = [];
+      map[currentSection].push({ item: b, idx: i });
+    });
+    return map;
+  }, []);
+
+  // For "auto-archive done items" — when filter is "all", group checked items at the bottom
   return (
     <div>
+      <PreFlightCard />
       <NotesSection notes={notes} setNotes={setNotes} />
-      <div style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, padding: "14px 16px", marginBottom: 14, position: "relative", overflow: "hidden" }}>
+      <div style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, padding: "14px 16px", marginBottom: 14, position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 14 }}>
         <Confetti show={celebrate} />
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 7 }}>
-          <span style={{ fontSize: 13, color: "#5a4a30", fontWeight: 500, fontFamily: SANS }}>{isComplete ? "✦ All done! Selamat jalan ✦" : "Progress"}</span>
-          <span style={{ fontSize: 13, color: barColor, fontWeight: 700, fontFamily: SANS }}>{done} / {total}</span>
-        </div>
-        <div style={{ background: C.riceDeep, borderRadius: 4, height: 8, overflow: "hidden" }}>
-          <div style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${C.ember}, ${barColor})`, height: "100%", transition: "width 0.4s, background 0.4s" }} />
+        <ProgressRing value={done} max={total} label="Booked" color={ringColor} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, color: "#3a2a1a", fontWeight: 600, fontFamily: SANS, lineHeight: 1.4 }}>
+            {isComplete ? "✦ All done! Selamat jalan ✦" : `${total - done} ${total - done === 1 ? "task" : "tasks"} to go`}
+          </div>
+          <div style={{ fontSize: 12, color: C.textGhost, marginTop: 2, fontFamily: SANS }}>
+            {isComplete ? "Everything's booked." : "Tap the chips below to filter."}
+          </div>
+          <div style={{ background: C.riceDeep, borderRadius: 4, height: 6, overflow: "hidden", marginTop: 10 }}>
+            <div style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${C.ember}, ${ringColor})`, height: "100%", transition: "width 0.4s, background 0.4s" }} />
+          </div>
         </div>
       </div>
-      {bookings.map((item, i) => {
-        if (item.section) return <SectionHead key={`s${i}`} label={item.section} />;
-        const k = `i${i}`;
-        const tag = tagConfig[item.tag] || tagConfig.anytime;
-        const isChecked = !!(checked && checked[k]);
+      <FilterPills filters={TASK_FILTERS} active={filter} setActive={setFilter} />
+      {Object.entries(sectionMap).map(([section, entries]) => {
+        const visible = entries.filter(({ item, idx }) => passesFilter(item, idx));
+        if (visible.length === 0) return null;
+        // Split into pending + done (only when filter is "all")
+        const pending = filter === "all" ? visible.filter(({ idx }) => !(checked && checked[`i${idx}`])) : visible;
+        const doneList = filter === "all" ? visible.filter(({ idx }) => checked && checked[`i${idx}`]) : [];
         return (
-          <div key={k} onClick={() => setChecked(p => ({ ...(p || {}), [k]: !(p && p[k]) }))} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "13px 14px", background: isChecked ? "rgba(45,74,46,0.04)" : C.white, border: `1px solid ${isChecked ? "#b0c9b0" : C.riceDark}`, borderRadius: 10, marginBottom: 6, cursor: "pointer", transition: "all 0.15s" }}>
-            <div style={{ width: 24, height: 24, borderRadius: 6, border: `1.5px solid ${isChecked ? C.moss : C.riceDark}`, background: isChecked ? C.moss : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
-              {isChecked && <span style={{ color: C.white, fontSize: 14 }}>✓</span>}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 15, color: isChecked ? "#5a4a30" : "#0f0a06", textDecoration: isChecked ? "line-through" : "none", textDecorationColor: "#7aaa7c", lineHeight: 1.4, fontWeight: 500, fontFamily: SANS }}>{item.title}</div>
-              <div style={{ fontSize: 13, color: "#7a6a50", marginTop: 3, lineHeight: 1.5, fontFamily: SANS }}>{item.sub}</div>
-            </div>
-            <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", background: tag.bg, color: tag.color, padding: "3px 7px", borderRadius: 8, whiteSpace: "nowrap", flexShrink: 0, fontWeight: 700, marginTop: 3, fontFamily: SANS }}>{tag.label}</div>
+          <div key={section}>
+            <SectionHead label={section} />
+            {pending.map(({ item, idx }) => renderTaskRow(item, idx, itemContext[idx], checked, setChecked, now))}
+            {doneList.length > 0 && (
+              <div onClick={() => setShowDone(p => !p)} style={{ fontSize: 11, color: C.textGhost, fontFamily: SANS, fontWeight: 600, cursor: "pointer", padding: "6px 4px", marginBottom: 4, userSelect: "none" }}>
+                {showDone ? "▲" : "▼"} {doneList.length} done
+              </div>
+            )}
+            {showDone && doneList.map(({ item, idx }) => renderTaskRow(item, idx, itemContext[idx], checked, setChecked, now))}
           </div>
         );
       })}
@@ -723,11 +1181,50 @@ function ChecklistView({ notes, setNotes, checked, setChecked }) {
   );
 }
 
-function DriversView({ notes, setNotes, checked, setChecked }) {
+function renderTaskRow(item, idx, ctx, checked, setChecked, now) {
+  const k = `i${idx}`;
+  const tag = tagConfig[item.tag] || tagConfig.anytime;
+  const isChecked = !!(checked && checked[k]);
+  const dateInfo = ctx?.dateInfo;
+  // Overdue = has date, date passed, NOT checked
+  const isOverdue = !isChecked && dateInfo && dateInfo.utc.getTime() < now.getTime();
+  const phone = parsePhone(item.sub) || parsePhone(item.title);
+  const borderColor = isChecked ? "#b0c9b0" : (isOverdue ? C.ember : C.riceDark);
+  const bgColor = isChecked ? "rgba(45,74,46,0.04)" : (isOverdue ? "rgba(196,99,58,0.05)" : C.white);
+  return (
+    <div key={k} onClick={() => setChecked(p => ({ ...(p || {}), [k]: !(p && p[k]) }))} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "13px 14px", background: bgColor, border: `1px solid ${borderColor}`, borderLeft: isOverdue ? `4px solid ${C.ember}` : `1px solid ${borderColor}`, borderRadius: 10, marginBottom: 6, cursor: "pointer", transition: "all 0.15s" }}>
+      <div style={{ width: 24, height: 24, borderRadius: 6, border: `1.5px solid ${isChecked ? C.moss : C.riceDark}`, background: isChecked ? C.moss : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
+        {isChecked && <span style={{ color: C.white, fontSize: 14 }}>✓</span>}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 15, color: isChecked ? "#5a4a30" : "#0f0a06", textDecoration: isChecked ? "line-through" : "none", textDecorationColor: "#7aaa7c", lineHeight: 1.4, fontWeight: 500, fontFamily: SANS }}>
+          {isOverdue && <span style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: C.ember, fontWeight: 800, marginRight: 6, background: "rgba(196,99,58,0.12)", padding: "2px 6px", borderRadius: 4 }}>⚠ Overdue</span>}
+          {item.title}
+        </div>
+        <div style={{ fontSize: 13, color: "#7a6a50", marginTop: 3, lineHeight: 1.5, fontFamily: SANS }}>{item.sub}</div>
+        {(phone || (dateInfo && dateInfo.hasTime)) && (
+          <div style={{ display: "flex", gap: 5, marginTop: 7 }}>
+            <ContactButtons phone={phone} />
+            <CalButton uid={`task-${idx}`} title={item.title} description={item.sub} dateInfo={dateInfo} />
+          </div>
+        )}
+      </div>
+      <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", background: tag.bg, color: tag.color, padding: "3px 7px", borderRadius: 8, whiteSpace: "nowrap", flexShrink: 0, fontWeight: 700, marginTop: 3, fontFamily: SANS }}>{tag.label}</div>
+    </div>
+  );
+}
+
+function DriversView({ notes, setNotes, checked, setChecked, actuals, setActuals }) {
   const actionableItems = driverPlan.filter(b => !b.section && b.status === "todo");
   const total = actionableItems.length;
   const done = Object.values(checked || {}).filter(Boolean).length;
-  const totalCost = driverPlan.reduce((sum, d) => sum + (d.costMid || 0), 0);
+  const expectedTotal = driverPlan.reduce((sum, d) => sum + (d.costMid || 0), 0);
+  const totalCost = driverPlan.reduce((sum, d, i) => {
+    const k = `dr${i}`;
+    const a = actuals && actuals[k];
+    return sum + (a != null ? a : (d.costMid || 0));
+  }, 0);
+  const anyActuals = actuals && Object.keys(actuals).some(k => k.startsWith("dr"));
   return (
     <div>
       <NotesSection notes={notes} setNotes={setNotes} />
@@ -744,9 +1241,11 @@ function DriversView({ notes, setNotes, checked, setChecked }) {
         if (item.section) return <SectionHead key={`s${i}`} label={item.section} />;
         const cfg = driverTypeConfig[item.type] || driverTypeConfig.none;
         const k = `d${i}`;
+        const actualK = `dr${i}`;
         const isCheckable = item.status === "todo";
         const isChecked = !!(checked && checked[k]);
         const onClick = isCheckable ? () => setChecked(p => ({ ...(p || {}), [k]: !(p && p[k]) })) : undefined;
+        const dateInfo = parseDateInText(item.day + " 08:00");
         return (
           <div key={k} onClick={onClick} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "13px 14px", background: isChecked ? "rgba(45,74,46,0.04)" : C.white, border: `1px solid ${isChecked ? "#b0c9b0" : C.riceDark}`, borderRadius: 10, marginBottom: 6, cursor: isCheckable ? "pointer" : "default", opacity: item.status === "na" ? 0.7 : 1 }}>
             <div style={{ width: 24, height: 24, borderRadius: 6, border: `1.5px solid ${isChecked ? C.moss : (isCheckable ? C.riceDark : "transparent")}`, background: isChecked ? C.moss : (isCheckable ? "transparent" : C.riceDeep), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
@@ -759,6 +1258,14 @@ function DriversView({ notes, setNotes, checked, setChecked }) {
                 <span style={{ fontSize: 15, color: isChecked ? "#5a4a30" : "#0f0a06", textDecoration: isChecked ? "line-through" : "none", textDecorationColor: "#7aaa7c", lineHeight: 1.4, fontWeight: 500, fontFamily: SANS }}>{item.title}</span>
               </div>
               <div style={{ fontSize: 13, color: "#7a6a50", marginTop: 4, lineHeight: 1.5, fontFamily: SANS }}>{item.sub}</div>
+              {item.costMid > 0 && (
+                <div style={{ display: "flex", gap: 6, marginTop: 6, alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ flex: "0 0 auto", maxWidth: 130 }}>
+                    <ActualPaidInput k={actualK} expected={item.costMid} actuals={actuals} setActuals={setActuals} />
+                  </div>
+                  {isCheckable && dateInfo && <CalButton uid={`drive-${i}`} title={item.title} description={item.sub} dateInfo={{ ...dateInfo, hasTime: true }} durationMins={120} />}
+                </div>
+              )}
             </div>
             <div style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", background: cfg.bg, color: cfg.color, padding: "3px 7px", borderRadius: 8, whiteSpace: "nowrap", flexShrink: 0, fontWeight: 700, marginTop: 3, fontFamily: SANS }}>{cfg.label}</div>
           </div>
@@ -767,10 +1274,10 @@ function DriversView({ notes, setNotes, checked, setChecked }) {
       <Divider />
       <div style={{ background: C.white, border: `1px solid ${C.riceDark}`, borderRadius: 12, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
         <div>
-          <div style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: C.textGhost, fontFamily: SANS, fontWeight: 600 }}>Est. transport total</div>
-          <div style={{ fontSize: 11, color: C.textGhost, marginTop: 3, fontFamily: SANS }}>Midpoint of all rides + transfers · AUD</div>
+          <div style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: C.textGhost, fontFamily: SANS, fontWeight: 600 }}>{anyActuals ? "Running total" : "Est. transport total"}</div>
+          <div style={{ fontSize: 11, color: C.textGhost, marginTop: 3, fontFamily: SANS }}>{anyActuals ? `Actuals + estimates · was ~$${expectedTotal}` : "Midpoint of all rides + transfers · AUD"}</div>
         </div>
-        <div style={{ fontFamily: SERIF, fontSize: 26, color: C.ember, fontWeight: 600 }}>~${totalCost}</div>
+        <div style={{ fontFamily: SERIF, fontSize: 26, color: C.ember, fontWeight: 600 }}>{anyActuals ? "$" : "~$"}{Math.round(totalCost)}</div>
       </div>
     </div>
   );
@@ -785,17 +1292,24 @@ export default function App() {
   const [driversChecked, setDriversCheckedState] = useState({});
   const [checklistNotes, setChecklistNotesState] = useState("");
   const [driverNotes, setDriverNotesState] = useState("");
+  const [actuals, setActualsState] = useState({});
   const [loaded, setLoaded] = useState(false);
   const [syncStatus, setSyncStatus] = useState("syncing");
 
   const notesDebounce = useRef({ cln: null, drn: null });
-  const tripStatus = useMemo(() => getTripStatus(), []);
+
+  // Register service worker for offline caching (T4-1)
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+  }, []);
 
   // Subscribe to Firebase on mount
   useEffect(() => {
     const subs = [];
     let loadedCount = 0;
-    const totalSubs = 4;
+    const totalSubs = 5;
 
     const onReady = () => {
       loadedCount++;
@@ -828,6 +1342,7 @@ export default function App() {
     subscribe("drivers-checked", setDriversCheckedState, true);
     subscribe("checklist-notes", setChecklistNotesState, false);
     subscribe("drivers-notes", setDriverNotesState, false);
+    subscribe("actuals", setActualsState, true);
 
     // Safety: mark loaded after 5 seconds even if Firebase is slow
     const timeout = setTimeout(() => {
@@ -882,6 +1397,14 @@ export default function App() {
     notesDebounce.current.drn = setTimeout(() => writeToFirebase("drivers-notes", val), 500);
   }, [writeToFirebase]);
 
+  const setActuals = useCallback((updater) => {
+    setActualsState(prev => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      writeToFirebase("actuals", next);
+      return next;
+    });
+  }, [writeToFirebase]);
+
   if (!loaded) {
     return (
       <div style={{ background: C.rice, minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20 }}>
@@ -906,9 +1429,7 @@ export default function App() {
             <div style={{ width: 36, height: 1, background: "linear-gradient(90deg, transparent, #c4633a, transparent)" }} />
             <span style={{ fontFamily: SERIF, fontSize: 14, color: "#d4aa50" }}>10 June 2026</span>
           </div>
-          <div style={{ marginTop: 14, display: "inline-block", padding: "5px 14px", background: "rgba(184,136,42,0.18)", border: "1px solid rgba(212,170,80,0.4)", borderRadius: 20, fontSize: 11, letterSpacing: "0.12em", color: "#d4aa50", textTransform: "uppercase", fontFamily: SANS, fontWeight: 600 }}>
-            {tripStatus.label}
-          </div>
+          <CountdownBanner />
         </div>
       </div>
 
@@ -927,16 +1448,18 @@ export default function App() {
 
       <div style={{ padding: "16px 12px 32px" }}>
         {tab === "journey" && <JourneyView />}
-        {tab === "dining" && <DiningView />}
+        {tab === "dining" && <DiningView actuals={actuals} setActuals={setActuals} />}
         {tab === "spa" && <SpaView />}
         {tab === "checklist" && <ChecklistView notes={checklistNotes} setNotes={setChecklistNotes} checked={checklistChecked} setChecked={setChecklistChecked} />}
-        {tab === "drivers" && <DriversView notes={driverNotes} setNotes={setDriverNotes} checked={driversChecked} setChecked={setDriversChecked} />}
+        {tab === "drivers" && <DriversView notes={driverNotes} setNotes={setDriverNotes} checked={driversChecked} setChecked={setDriversChecked} actuals={actuals} setActuals={setActuals} />}
       </div>
 
       <div style={{ background: C.night, textAlign: "center", padding: "24px 16px" }}>
         <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 24, color: "#d4aa50", marginBottom: 4, fontWeight: 500 }}>Selamat jalan ✦</div>
         <div style={{ fontSize: 9, letterSpacing: "0.18em", color: "rgba(253,250,245,0.3)", textTransform: "uppercase", fontFamily: SANS }}>Jun 2 – 10, 2026</div>
       </div>
+
+      <CurrencyWidget />
     </div>
   );
 }
