@@ -195,12 +195,12 @@ const days = [
       { time: "19:30", icon: "✦", act: "Dinner and relax at Udaya — the dinner of the trip" },
     ] },
   { num: 9, date: "Wed · Jun 10", iso: "2026-06-10", title: "Gentle Farewell", type: "ubu", badge: "Departure", anchor: "Final pool morning · fly home to Melbourne", budgetAUD: 85,
-    packingList: ["All luggage packed (checkout 11:00)", "Download boarding passes the night before", "Klook transfer confirmed · depart 11:00", "Leave tips for Udaya staff + thank housekeeping"],
+    packingList: ["All luggage packed (checkout before 07:00)", "Download boarding passes the night before", "Klook transfer booked · depart 7:00 AM from Udaya", "Leave tips for Udaya staff + thank housekeeping"],
     schedule: [
       { time: "08:30", icon: "☕️", act: "Slow breakfast at Deeva or in bed" },
       { time: "09:30", icon: "🏊", act: "Final float in Jungle Pool Suite private pool" },
       { time: "10:30", icon: "🧳", act: "Pack · checkout" },
-      { time: "11:00", icon: "🚗", act: "Udaya pre-arranged transfer → DPS Airport (~90 min)" },
+      { time: "07:00", icon: "🚗", act: "Udaya → DPS Airport via Klook (BOOKED · ~90 min)" },
       { time: "PM", icon: "✈️", act: "Fly home · Selamat jalan ✦" },
     ] },
 ];
@@ -301,7 +301,7 @@ const driverPlan = [
   { day: "Jun 8", title: "Full day driver (KEEP)", sub: "Gorilla ATV 08:30 → Udaya rest → INKA 13:45 pickup → Sayan House 15:30 · full day · $60 flat", type: "confirmed", status: "done", costMid: 60 },
   { day: "Jun 9", title: "Short ride to BSI for IV Drip", sub: "Order Bluebird or Gojek · ~10:00 AM · Kaveri at Udaya · $0 driver needed rest of day", type: "bluebird", status: "na", costMid: 0 },
   { section: "Departure" },
-  { day: "Jun 10", title: "Airport transfer Udaya → DPS", sub: "To be booked via Klook · depart 11:00", type: "book", status: "todo", costMid: 60 },
+  { day: "Jun 10", title: "Airport transfer Udaya → DPS (BOOKED)", sub: "Via Klook · 7:00 AM departure · ~90 min · early checkout", type: "confirmed", status: "done", costMid: 60 },
 ];
 
 const typeColor = { sem: C.ember, ubu: C.moss, trn: C.gold };
