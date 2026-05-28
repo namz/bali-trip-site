@@ -228,7 +228,7 @@ const spas = [
 
 const bookings = [
   { section: "Flights & Accommodation" },
-  { title: "Book Uber/Taxi: Home → MEL Airport — Jun 2", sub: "Flight departs 6:35 AM · book 2 days in advance · arrive airport by 4:30 AM", tag: "urgent" },
+  { title: "Uber: Home → MEL Airport — BOOKED ✓", sub: "Pickup 3:00 AM Jun 2 · arrive by 4:30 AM · Flight 6:35 AM", tag: "done" },
   { title: "Book flights MEL → DPS → MEL", sub: "Land DPS ~10:35 on Jun 2. Return Jun 10 PM.", tag: "urgent" },
   { title: "Confirm Monolocale Resort & Spa — Jun 2–6", sub: "Seminyak · 4 nights", tag: "urgent" },
   { title: "Confirm The Udaya — Jun 6–10", sub: "Jungle Pool Suite · 4 nights · daily fruit basket", tag: "urgent" },
@@ -275,8 +275,8 @@ const bookings = [
   { section: "Travel Admin" },
   { title: "Apply for e-VOA", sub: "14–30 days before · molina.imigrasi.go.id · IDR 500k/person · window open NOW", tag: "urgent" },
   { title: "Submit Indonesia Arrival Card (e-CD)", sub: "Within 72 hrs before landing · allindonesia.imigrasi.go.id", tag: "urgent" },
-  { title: "Pay Bali Tourist Levy (IDR 150k/person)", sub: "lovebali.baliprov.go.id · keep QR receipt", tag: "urgent" },
-  { title: "Buy eSIM for both", sub: "Airalo or Holafly · 5–10GB plan", tag: "soon" },
+  { title: "Bali Tourist Levy — PAID ✓", sub: "IDR 150k/person · keep QR code receipt on phone", tag: "done" },
+  { title: "eSIM — DONE ✓", sub: "Purchased · wife to install before departure", tag: "done" },
   { title: "Set up travel debit card (Wise or Macquarie)", sub: "Order 2 weeks before flying", tag: "urgent" },
   { title: "Carry IDR cash", sub: "IDR 2–3M for tips, warungs, taxis", tag: "soon" },
   { section: "Pre-Departure" },
@@ -288,7 +288,7 @@ const bookings = [
 
 const driverPlan = [
   { section: "Pre-Trip (Australia)" },
-  { day: "Jun 2", title: "Uber/Taxi: Home → MEL Airport", sub: "Flight 6:35 AM · book 2 days in advance · arrive by 4:30 AM", type: "book", status: "todo", costMid: 60 },
+  { day: "Jun 2", title: "Uber: Home → MEL Airport (BOOKED)", sub: "Pickup 3:00 AM Jun 2 · arrive airport by 4:30 AM · Flight 6:35 AM", type: "confirmed", status: "done", costMid: 60 },
   { section: "Seminyak" },
   { day: "Jun 2", title: "Airport pickup DPS → Monolocale", sub: "Pre-arranged via Klook · Meet at Klook kiosk", type: "confirmed", status: "done", costMid: 42 },
   { day: "Jun 3", title: "No driver needed", sub: "Svaha Spa near Monolocale · Bluebird for Merah Putih dinner", type: "none", status: "na", costMid: 0 },
