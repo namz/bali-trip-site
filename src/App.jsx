@@ -276,6 +276,7 @@ const bookings = [
   { title: "Submit Indonesia Arrival Card (e-CD)", sub: "Within 72 hrs before landing · allindonesia.imigrasi.go.id", tag: "urgent" },
   { title: "Bali Tourist Levy — PAID ✓", sub: "IDR 150k/person · keep QR code receipt on phone", tag: "done" },
   { title: "eSIM — DONE ✓", sub: "Purchased · wife to install before departure", tag: "done" },
+  { title: "Travel Insurance — Bali", sub: "Medical + cancellation + luggage · AUD $25–80/person · book 7 days before", tag: "urgent" },
   { title: "Set up travel debit card (Wise or Macquarie)", sub: "Order 2 weeks before flying", tag: "urgent" },
   { title: "Carry IDR cash", sub: "IDR 2–3M for tips, warungs, taxis", tag: "soon" },
   { section: "Pre-Departure" },
