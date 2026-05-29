@@ -260,9 +260,8 @@ const bookings = [
   { title: "Brief concierge — Jun 9 evening", sub: "Suite ready 16:00", tag: "urgent" },
   { section: "Pharmacy — Buy in Australia 🇦🇺" },
   { title: "Travelan (Bali Belly defence)", sub: "1 tablet 30 min before each meal · daily from 2 days pre-landing · NOT sold in Bali", tag: "pharmacy" },
-  { title: "DEET 30%+ backup", sub: "For high-mozzie zones · jungle + evening outdoor dining · local Bali brands too weak", tag: "pharmacy" },
+  { title: "Prunelax (natural laxative)", sub: "Gentle bowel support · 1–2 tablets as needed · easier to get in Australia", tag: "pharmacy" },
   { title: "Sunscreen SPF 50+ (face + body)", sub: "Reef-safe · reapply every 2 hrs · more expensive in Bali", tag: "pharmacy" },
-  { title: "Blister plasters (Compeed)", sub: "For walking + day trips · brand not reliably available in Bali", tag: "pharmacy" },
   { title: "Prescription meds from GP", sub: "Flagyl/Metronidazole + any scripts · original packaging + doctor's letter", tag: "pharmacy" },
   { section: "Pharmacy — Buy in Bali 🏝️" },
   { title: "Loperamide (Lodia) + Oralit ORS sachets", sub: "Bali belly kit · Lodia ~IDR 25k · Oralit ~IDR 2–3k/sachet · at any apotek", tag: "pharmacy" },
@@ -763,7 +762,7 @@ function PreFlightCard() {
     "Bali offline Google Maps downloaded",
     "Travelan started (48 hr before each meal)",
     "Charger + adapter (Type C/F) packed",
-    "Sunscreen + DEET + Compeed in carry-on",
+    "Sunscreen + Prunelax in carry-on",
   ];
   return (
     <div style={{ background: "linear-gradient(135deg, rgba(196,99,58,0.08), rgba(184,136,42,0.06))", border: `2px solid ${C.ember}`, borderRadius: 12, padding: "14px 16px", marginBottom: 16, position: "relative" }}>
