@@ -264,6 +264,7 @@ const bookings = [
   { title: "LRP Anthelios Invisible Tinted Fluid SPF50+", sub: "Face sunscreen · Chemist Warehouse · reapply every 2 hrs", tag: "pharmacy" },
   { title: "Sun Bum Original SPF 30 Sunscreen Scalp and Hair Mist", sub: "Hair + scalp protection · Chemist Warehouse · prevent sun damage", tag: "pharmacy" },
   { title: "Mounjaro injection", sub: "Buy at Chemist Warehouse · keep in cool pack / hotel fridge", tag: "pharmacy" },
+  { title: "Vitamin D + K2", sub: "Buy at Chemist Warehouse · supports bone & immune health", tag: "pharmacy" },
   { title: "Sunscreen SPF 50+ (face + body)", sub: "Reef-safe · reapply every 2 hrs · more expensive in Bali", tag: "pharmacy" },
   { title: "Prescription meds from GP", sub: "Flagyl/Metronidazole + any scripts · original packaging + doctor's letter", tag: "pharmacy" },
   { section: "Pharmacy — Buy in Bali 🏝️" },
