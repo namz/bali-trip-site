@@ -275,6 +275,8 @@ const bookings = [
   { title: "Paracetamol (Panadol/Sanmol) + Ibuprofen (Brufen)", sub: "Heat headaches, muscle soreness · combined ~IDR 15–30k · apotek or minimart", tag: "pharmacy" },
   { title: "Band-aids (Plester) + Betadine antiseptic", sub: "Scooter scratches, waterfall rocks · Betadine 30mL ~IDR 25–35k · everywhere", tag: "pharmacy" },
   { title: "Antimo (travel sickness / dimenhydrinate)", sub: "Windy mountain roads Seminyak → Ubud · IDR 8–15k · even at Indomaret", tag: "pharmacy" },
+  { title: "Azarine Hydrasoothe SPF45 PA+ (x5 tubes)", sub: "Buy 5 tubes · Guardian or Kimia Farma · local cult favourite · much cheaper than Australia", tag: "pharmacy" },
+  { title: "Tretinoin cream — for Misha", sub: "Available OTC at Bali apoteks without prescription · ask for Tretinoin 0.025% or 0.05% · ~IDR 30–80k", tag: "pharmacy" },
   { section: "Haircare — Australia 🇦🇺" },
   { title: "COLOR WOW Dream Coat Spray", sub: "From Hairhouse · heat protectant + anti-frizz · essential for humid Bali", tag: "haircare" },
   { section: "Travel Admin" },
