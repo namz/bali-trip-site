@@ -481,6 +481,7 @@ const TASK_FILTERS = [
   { id: "soon", label: "Soon", tag: "soon" },
   { id: "pharm-au", label: "Pharm AU", section: "Pharmacy — Buy in Australia 🇦🇺" },
   { id: "pharm-bali", label: "Pharm Bali", section: "Pharmacy — Buy in Bali 🏝️" },
+  { id: "must-buy", label: "Must-Buy 🛍️", section: "Bali Must-Buy 🛍️" },
 ];
 
 // ============================================
