@@ -82,13 +82,13 @@ const tipping = [
 // DATA
 // ============================================
 const days = [
-  { num: 1, date: "Tue · Jun 2", iso: "2026-06-02", title: "Arrival + PRF Liquid Full Face + Eyes", type: "sem", badge: "Seminyak", anchor: "Land 10:35 · PRF Liquid Full Face + Eyes · Shelter dinner", budgetAUD: 300,
+  { num: 1, date: "Tue · Jun 2", iso: "2026-06-02", title: "Arrival + Bodylabs (Cellboosters + Hydrafacial)", type: "sem", badge: "Seminyak", anchor: "Land 10:35 · Bodylabs 17:00 — Cellboosters (Nams) + Hydrafacial (Rebecca) · Shelter dinner", budgetAUD: 300,
     packingList: ["Passport + e-VOA confirmation ready", "Comfortable travel clothes", "Electrolytes + hydration for flight", "AUD cash to exchange at airport", "Download Bluebird + Gojek before landing"],
     venues: [{ name: "Bodylabs Skin & Wellness", phone: "62361736969", maps: "Bodylabs+Skin+Wellness+Seminyak+Bali" }, { name: "Shelter Restaurant", phone: "62361735368", maps: "Shelter+Restaurant+Seminyak+Bali" }],
     schedule: [
       { time: "10:35", icon: "✈️", act: "Land DPS — Klook pickup · meet at Klook kiosk" },
       { time: "12:00", icon: "🏨", act: "Check in · shower · decompress" },
-      { time: "17:00", icon: "💆", act: "Bodylabs — PRF Liquid Full Face + Eyes" },
+      { time: "17:00", icon: "💆", act: "Bodylabs — Cellboosters (Nams) + Hydrafacial (Rebecca) · Accutane-safe" },
       { time: "19:00", icon: "🍽", act: "Dinner: Shelter Restaurant — modern Australian-Asian" },
       { time: "21:00", icon: "🌙", act: "Return · 750ml water + electrolytes · sleep" },
     ] },
@@ -120,13 +120,15 @@ const days = [
       { time: "16:00", icon: "🌅", act: "Ku De Ta (now Alias) — beachfront, pools, sunset" },
       { time: "19:30", icon: "🍽", act: "Dinner at Ku De Ta" },
     ] },
-  { num: 5, date: "Sat · Jun 6", iso: "2026-06-06", title: "Transfer to Ubud + Kaveri", type: "trn", badge: "Transfer", anchor: "Seminyak → Ubud · Jungle Pool Suite · Kaveri 4 Hands", budgetAUD: 270,
+  { num: 5, date: "Sat · Jun 6", iso: "2026-06-06", title: "Transfer to Ubud + Omma Dayclub + Kaveri", type: "trn", badge: "Transfer", anchor: "Seminyak → Omma Dayclub (midpoint) → Ubud · Jungle Pool Suite · Kaveri 4 Hands", budgetAUD: 270,
     packingList: ["All luggage packed + ready by 09:00", "Swimwear accessible (Kaveri spa on arrival)", "Snacks + water for 90-min mountain transfer", "Say goodbye to Seminyak + Monolocale"],
     venues: [{ name: "The Udaya Resort & Spa", phone: "62361975668", maps: "The+Udaya+Resort+Ubud+Bali" }, { name: "Kaveri Spa", phone: "62361975668", maps: "Kaveri+Spa+Udaya+Ubud" }],
     schedule: [
       { time: "09:00", icon: "☕️", act: "Slow last breakfast at Monolocale" },
       { time: "09:30", icon: "🚗", act: "Checkout · depart Seminyak → Ubud (~90 min)" },
-      { time: "11:00", icon: "🌿", act: "Arrive The Udaya · Jungle Pool Suite walkthrough" },
+      { time: "10:45", icon: "🍽", act: "Midpoint breakfast stop — Omma Dayclub · infinity pool + Tegenungan Waterfall views · ~38km from Seminyak" },
+      { time: "12:00", icon: "🚗", act: "Continue to Ubud (~40 min)" },
+      { time: "12:45", icon: "🌿", act: "Arrive The Udaya · Jungle Pool Suite walkthrough" },
       { time: "13:30", icon: "💆", act: "Kaveri Spa — 4 Hands Massage (60 min) + Scrub + Botanical Bath (2 hrs)" },
       { time: "19:00", icon: "🍽", act: "Room service or Deeva Restaurant in-suite" },
     ] },
@@ -223,7 +225,7 @@ const dining = [
 ];
 
 const spas = [
-  { day: "Jun 2", date: "Tue · Jun 2", name: "PRF Liquid Full Face + Eyes", loc: "Bodylabs, Seminyak", dur: "~90 min", mins: 90 },
+  { day: "Jun 2", date: "Tue · Jun 2", name: "Cellboosters (Nams) + Hydrafacial (Rebecca)", loc: "Bodylabs, Seminyak", dur: "~90 min", mins: 90 },
   { day: "Jun 3", date: "Wed · Jun 3", name: "Ear Candle + Back Massage + Body Scrub", loc: "Svaha Spa, Seminyak", dur: "~2.5 hrs", mins: 150 },
   { day: "Jun 4", date: "Thu · Jun 4", name: "Deep Tissue (Nams) + Lymphatic Drainage (Rebecca) + Foot Massage", loc: "Spring Spa, Seminyak Village", dur: "90 min each", mins: 90 },
   { day: "Jun 5", date: "Fri · Jun 5", name: "Bali Barber + Shampoo Lounge", loc: "Bali Barber / Shampoo Lounge", dur: "4–5 hrs", mins: 270 },
@@ -241,7 +243,7 @@ const bookings = [
   { title: "Confirm The Udaya — Jun 6–10", sub: "Jungle Pool Suite · 4 nights · daily fruit basket", tag: "urgent" },
   { title: "Book airport pickup via Klook — Jun 2", sub: "Meet at Klook kiosk at DPS · no Grab at airport", tag: "urgent" },
   { section: "Treatments & Spa" },
-  { title: "Book Bodylabs — Jun 2, 17:00", sub: "PRF Liquid Full Face + Eyes · Seminyak", tag: "urgent" },
+  { title: "Book Bodylabs — Jun 2, 17:00", sub: "Cellboosters (Nams) + Hydrafacial (Rebecca) · Accutane-safe · Seminyak", tag: "urgent" },
   { title: "Book Svaha Spa — Jun 3, 11:00", sub: "Ear Candle + Back Massage + Javanese Body Scrub (~2.5 hrs)", tag: "urgent" },
   { title: "Spring Spa — Jun 4, 11:15 — CONFIRMED ✓", sub: "Deep Tissue 90 min (Nams) + Lymphatic Drainage 90 min (Rebecca) · Seminyak Village rooftop", tag: "done" },
   { title: "WhatsApp Bali Barber — Jun 5, 10:00", sub: "President's Package · +62 853 3833 3338", tag: "urgent" },
@@ -298,11 +300,12 @@ const bookings = [
   { section: "Haircare — Australia 🇦🇺" },
   { title: "COLOR WOW Dream Coat Spray", sub: "From Hairhouse · heat protectant + anti-frizz · essential for humid Bali", tag: "haircare" },
   { section: "Travel Admin" },
-  { title: "Apply for e-VOA", sub: "14–30 days before · molina.imigrasi.go.id · IDR 500k/person · window open NOW", tag: "urgent" },
+  { title: "Apply for e-VOA — DONE ✓", sub: "molina.imigrasi.go.id · IDR 500k/person · keep QR code on phone", tag: "done" },
   { title: "Submit Indonesia Arrival Card (e-CD)", sub: "Within 72 hrs before landing · allindonesia.imigrasi.go.id", tag: "urgent" },
   { title: "Bali Tourist Levy — PAID ✓", sub: "IDR 150k/person · keep QR code receipt on phone", tag: "done" },
-  { title: "eSIM — Received · Setup required", sub: "Install on phone before departure · activate on landing in Bali", tag: "urgent" },
-  { title: "Travel Insurance — Bali", sub: "Medical + cancellation + luggage · AUD $25–80/person · book 7 days before", tag: "urgent" },
+  { title: "eSIM — DONE ✓", sub: "Set up and ready · activate on landing in Bali", tag: "done" },
+  { title: "Travel Insurance — DONE ✓", sub: "Medical + cancellation + luggage · keep policy number on phone", tag: "done" },
+  { title: "⚠️ Pick up BOTH passports tonight", sub: "Don't forget — flight is 6:35 AM Jun 2 · Uber pickup 3:00 AM", tag: "urgent" },
   { title: "Carry IDR cash — DONE ✓", sub: "6M IDR purchased · for tips, warungs, taxis, activities", tag: "done" },
   { section: "Pre-Departure" },
   { title: "Download Bluebird app", sub: "Set up AUD card · essential for Seminyak", tag: "anytime" },
