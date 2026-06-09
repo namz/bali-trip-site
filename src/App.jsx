@@ -288,7 +288,7 @@ const bookings = [
   { section: "Bali Must-Buy 🛍️" },
   { title: "Ellips Hair Oil Capsules ⭐ 10/10", sub: "3–4 packs · Indomaret / Guardian · ~IDR 20–30k per pack · not available in Australia", tag: "pharmacy" },
   { title: "Tolak Angin Sachets ⭐ 10/10", sub: "Buy 20–30 sachets · Indomaret / Alfamart · ~IDR 3–5k each · immune support + digestion · not in Australia", tag: "pharmacy" },
-  { title: "COSRX Acne Patches ⭐ 9/10", sub: "Guardian / Watson's · much cheaper than Australia · stock up", tag: "pharmacy" },
+  { title: "COSRX Acne Patches ⭐ 9/10 (x5 packs)", sub: "Guardian / Watson's · buy 5 packs · much cheaper than Australia · stock up", tag: "pharmacy" },
   { title: "Hada Labo Gokujyun HA Lotion ⭐ 9/10", sub: "Guardian / Watson's · 3x cheaper than Australia · hyaluronic acid toner", tag: "pharmacy" },
   { title: "Skintific 5X Ceramide Low pH Cleanser ⭐ 7/10", sub: "Guardian / Sociolla · not available in Australia · barrier repair cleanser", tag: "pharmacy" },
   { title: "Benzolac 5% BPO Gel ⭐ 6/10", sub: "Any apotek · spot use only on active bumps · IDR 20–40k", tag: "pharmacy" },
