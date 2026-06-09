@@ -292,6 +292,7 @@ const bookings = [
   { title: "Hada Labo Gokujyun HA Lotion ⭐ 9/10", sub: "Guardian / Watson's · 3x cheaper than Australia · hyaluronic acid toner", tag: "pharmacy" },
   { title: "Skintific 5X Ceramide Low pH Cleanser ⭐ 7/10", sub: "Guardian / Sociolla · not available in Australia · barrier repair cleanser", tag: "pharmacy" },
   { title: "Benzolac 5% BPO Gel ⭐ 6/10", sub: "Any apotek · spot use only on active bumps · IDR 20–40k", tag: "pharmacy" },
+  { title: "Counterpain Cool Gel", sub: "Any Guardian / Indomaret / apotek · muscle pain relief · great for post-ATV + post-massage soreness · IDR 30–60k", tag: "pharmacy" },
   { section: "Haircare — Australia 🇦🇺" },
   { title: "COLOR WOW Dream Coat Spray", sub: "From Hairhouse · heat protectant + anti-frizz · essential for humid Bali", tag: "haircare" },
   { section: "Travel Admin" },
