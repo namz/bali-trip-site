@@ -203,14 +203,14 @@ const days = [
       { time: "16:00", icon: "🛁", act: "Return to Jungle Pool Suite · dress slowly together" },
       { time: "19:30", icon: "✦", act: "Dinner and relax at Udaya — the dinner of the trip" },
     ] },
-  { num: 9, date: "Wed · Jun 10", iso: "2026-06-10", title: "Gentle Farewell", type: "ubu", badge: "Departure", anchor: "Final pool morning · fly home to Melbourne", budgetAUD: 85,
-    packingList: ["All luggage packed (checkout before 07:00)", "Download boarding passes the night before", "Klook transfer booked · depart 7:00 AM from Udaya", "Leave tips for Udaya staff + thank housekeeping"],
+  { num: 9, date: "Wed · Jun 10", iso: "2026-06-10", title: "Gentle Farewell", type: "ubu", badge: "Departure", anchor: "Klook 7:00 AM · Flight 12:05 PM DPS → MEL · fly home to Melbourne", budgetAUD: 85,
+    packingList: ["All luggage packed (checkout before 07:00)", "Download boarding passes the night before", "Klook transfer BOOKED · depart 7:00 AM · arrive DPS ~8:30 AM", "Check-in closes 10:05 AM · flight 12:05 PM", "Leave tips for Udaya staff + thank housekeeping"],
     schedule: [
       { time: "08:30", icon: "☕️", act: "Slow breakfast at Deeva or in bed" },
       { time: "09:30", icon: "🏊", act: "Final float in Jungle Pool Suite private pool" },
       { time: "10:30", icon: "🧳", act: "Pack · checkout" },
       { time: "07:00", icon: "🚗", act: "Udaya → DPS Airport via Klook (BOOKED · ~90 min)" },
-      { time: "PM", icon: "✈️", act: "Fly home · Selamat jalan ✦" },
+      { time: "12:05", icon: "✈️", act: "Fly home to Melbourne · Jetstar · DPS departs 12:05 PM · Selamat jalan ✦" },
     ] },
 ];
 
@@ -238,7 +238,7 @@ const spas = [
 const bookings = [
   { section: "Flights & Accommodation" },
   { title: "Uber: Home → MEL Airport — BOOKED ✓", sub: "Pickup 3:00 AM Jun 2 · arrive by 4:30 AM · Flight 6:35 AM", tag: "done" },
-  { title: "Book flights MEL → DPS → MEL", sub: "Land DPS ~10:35 on Jun 2. Return Jun 10 PM.", tag: "urgent" },
+  { title: "Book flights MEL → DPS → MEL", sub: "Land DPS ~10:35 on Jun 2. Return Jun 10 · departs DPS 12:05 PM.", tag: "urgent" },
   { title: "Confirm Monolocale Resort & Spa — Jun 2–6", sub: "Seminyak · 4 nights", tag: "urgent" },
   { title: "Confirm The Udaya — Jun 6–10", sub: "Jungle Pool Suite · 4 nights · daily fruit basket", tag: "urgent" },
   { title: "Book airport pickup via Klook — Jun 2", sub: "Meet at Klook kiosk at DPS · no Grab at airport", tag: "urgent" },
