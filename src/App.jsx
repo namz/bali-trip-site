@@ -294,6 +294,7 @@ const bookings = [
   { title: "Benzolac 5% BPO Gel ⭐ 6/10", sub: "Any apotek · spot use only on active bumps · IDR 20–40k", tag: "pharmacy" },
   { title: "Counterpain Cool Gel", sub: "Any Guardian / Indomaret / apotek · muscle pain relief · great for post-ATV + post-massage soreness · IDR 30–60k", tag: "pharmacy" },
   { title: "Simethicone (Gas-X)", sub: "Any Guardian / apotek · bloating + gas relief · IDR 20–40k · ask for Simethicone or Mylanta", tag: "pharmacy" },
+  { title: "Forte Cigs Cool Mando (x2 packs)", sub: "Buy 2 packs · local convenience store or tobacco shop · unique to Indonesia", tag: "pharmacy" },
   { section: "Haircare — Australia 🇦🇺" },
   { title: "COLOR WOW Dream Coat Spray", sub: "From Hairhouse · heat protectant + anti-frizz · essential for humid Bali", tag: "haircare" },
   { section: "Travel Admin" },
