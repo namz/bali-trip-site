@@ -293,6 +293,7 @@ const bookings = [
   { title: "Skintific 5X Ceramide Low pH Cleanser ⭐ 7/10", sub: "Guardian / Sociolla · not available in Australia · barrier repair cleanser", tag: "pharmacy" },
   { title: "Benzolac 5% BPO Gel ⭐ 6/10", sub: "Any apotek · spot use only on active bumps · IDR 20–40k", tag: "pharmacy" },
   { title: "Counterpain Cool Gel", sub: "Any Guardian / Indomaret / apotek · muscle pain relief · great for post-ATV + post-massage soreness · IDR 30–60k", tag: "pharmacy" },
+  { title: "Simethicone (Gas-X)", sub: "Any Guardian / apotek · bloating + gas relief · IDR 20–40k · ask for Simethicone or Mylanta", tag: "pharmacy" },
   { section: "Haircare — Australia 🇦🇺" },
   { title: "COLOR WOW Dream Coat Spray", sub: "From Hairhouse · heat protectant + anti-frizz · essential for humid Bali", tag: "haircare" },
   { section: "Travel Admin" },
